@@ -1,0 +1,126 @@
+.displayMenu-container{
+    display: grid;
+    grid-template-columns: repeat(21, 3fr);
+    grid-template-rows: repeat(21, 3fr);
+}
+
+.displayMenu-title{
+    grid-area: 3 / 11 / 4 / 12;
+    font-size: 4em;
+    color: white;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none;
+    margin-bottom: 35%;
+}
+
+.displayMenu-backButton{
+    grid-area: 19 / 11 / 20 / 12;
+    font-size: 1.5em;
+    width: 33.5%;
+    margin-left: 33.5%;
+    margin-top: 23%;
+}
+
+
+.displayMenu-textToSpeechButton{
+    font-size: 0.8em;
+    font-weight: bold;
+    grid-area: 7 / 11 / 8 / 12;
+    width: 30%;
+    margin-left: 35%;
+    height: 130%;
+}
+
+.displayMenu-textToSpeechText{
+    font-size: 2em;
+    color: white;
+    grid-area: 6 / 11 / 7 / 12;
+    width: 150%;
+    height: auto;
+}
+
+.displayMenu-highContrastButton{
+    font-size: 0.8em;
+    font-weight: bold;
+    grid-area: 10 / 11 / 11 / 12;
+    width: 30%;
+    margin-left: 35%;
+    height: 130%;
+}
+
+.displayMenu-highContrastText{
+    font-size: 2em;
+    color: white;
+    grid-area: 9 / 11 / 10 / 12;
+    width: auto;
+    height: auto;
+}
+
+.displayMenu-smallTextButton{
+    font-size: 1.5em;
+    font-weight: bolder;
+    grid-area: 13 / 11 / 14 / 12;
+    width: 30%;
+    height: 50;
+    margin-left: 5%;
+}
+
+.displayMenu-mediumTextButton{
+    font-size: 1.5em;
+    font-weight: bold;
+    grid-area: 13 / 11 / 14 / 12;
+    width: 30%;
+    height: 50;
+    margin-left: 35%;
+
+}
+
+.displayMenu-largeTextButton{
+    font-size: 1.5em;
+    font-weight: bolder;
+    grid-area: 13 / 11 / 14 / 12;
+    width: 30%;
+    height: 50;
+    margin-left: 65%;
+}
+
+.displayMenu-textSize{
+    font-size: 2em;
+    color: white;
+    grid-area: 12 / 11 / 13/ 12;
+    width: auto;
+    height: auto;
+    margin-bottom: 5%;
+    margin-left: 19%;
+}
+
+.displayMenu-englishButton{
+    grid-area: 16 / 11 / 17/ 12;
+    font-size: 1.5em;
+    font-weight: bold;
+    width: 30%;
+    height: 50;
+    margin-left: 50%;
+}
+
+.displayMenu-frenchButton{
+    grid-area: 16 / 11 / 17/ 12;
+    font-size: 1.5em;
+    font-weight: bold;
+    width: 30%;
+    height: 50;
+    margin-left: 20%;
+}
+
+.displayMenu-language{
+    grid-area: 15 / 11 / 16 / 12;
+    font-size: 2em;
+    color: white;
+    margin-left: 17%;
+    margin-bottom: 5%;
+}

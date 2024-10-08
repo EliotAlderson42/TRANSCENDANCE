@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transcendance</title>
+
+<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/audioMenu.css">
+<link rel="stylesheet" href="css/settingsMenu.css">
+<link rel="stylesheet" href="css/displayMenu.css">
+<link rel="stylesheet" href="css/mainMenu.css">
+<link rel="stylesheet" href="css/accountMenu.css">
+<link rel="stylesheet" href="css/gameMenu.css">
+
+</head>
+</html>
+
+<body>
+    <script src = "js/switchLanguage.js"> </script>
+    <script src = "js/containers.js"> </script>
+    <script src = "js/mainMenu.js"> </script>
+    <script src = "js/audioMenu.js"> </script>
+    <script src = "js/settingsMenu.js"> </script>
+    <script src = "js/displayMenu.js"> </script>
+    <script src = "js/accountMenu.js"> </script>
+    <script src = "js/gameMenu.js"> </script>
+
+    <audio id="backgroundAudio" loop>
+        <source src="audio/bgMusic.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="pongAudio">
+        <source src="audio/PONG.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="hoverSound">
+        <source src="audio/Hover.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickIn">
+        <source src="audio/lambdaButtonIn.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickOut">
+        <source src="audio/lambdaButtonOut.mp3" type="audio/mpeg">
+    </audio>
+    <div id="dynamicContent"></div>
+
+    <script>
+        function playAudio(audioId){
+            const audio = document.getElementById(audioId);
+            if (audio)
+                audio.play();
+        }
+        function switchAudio(audioId){
+            const audio = document.getElementById(audioId);
+            if (audio)
+                audio.muted ? audio.muted = false : audio.muted = true;
+        }
+    </script>
+
+</body>
+</html>
+

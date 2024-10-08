@@ -1,0 +1,25 @@
+
+.accountMenu-backButton{
+    font-size : 1.5em;
+    width : fit-content;
+    margin-top : 11%;
+}
+
+.accountMenu-image {
+    max-width: 140px;
+    max-height: 140px;
+    margin: 1px 0;
+}
+
+.buttonContainer {
+    display: grid;
+    gap: 10px; /* Espace entre les boutons */
+}
+
+.accountMenu-rightButton,
+.accountMenu-leftButton {
+    width: 50px; /* Largeur fixe pour les boutons */
+    height: 50px; /* Hauteur fixe pour les boutons */
+    text-align: center; /* Centre le texte à l'intérieur du bouton */
+    line-height: 50px; /* Centre verticalement le texte */
+}
