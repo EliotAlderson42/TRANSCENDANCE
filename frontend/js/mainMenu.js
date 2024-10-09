@@ -74,6 +74,7 @@ function mainMenu() {
     hoverSound.play();
     });
 
+ 
     container.appendChild(pong);
     container.appendChild(play);
     container.appendChild(settings);
