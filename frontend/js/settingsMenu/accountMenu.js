@@ -25,6 +25,7 @@ function accountMenu() {
     historyButton.textContent = 'History';
     historyButton.addEventListener('click', () => {
         playAudio('clickIn');
+        historyMenu();
     });
     historyButton.addEventListener('mouseover', () => {
         hoverSound.play();
@@ -36,6 +37,7 @@ function accountMenu() {
     statsButton.textContent = 'Stats';
     statsButton.addEventListener('click', () => {
         playAudio('clickIn');
+        statsMenu();
     });
     statsButton.addEventListener('mouseover', () => {
         hoverSound.play();

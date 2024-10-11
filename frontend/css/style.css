@@ -55,7 +55,7 @@
 }
 
 .fadeOut{
-  animation: fadeOut 1s forwards;
+  animation: fadeOut 4s forwards;
 }
 
 .animationActive{

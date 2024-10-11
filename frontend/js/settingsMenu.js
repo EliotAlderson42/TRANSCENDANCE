@@ -1,9 +1,7 @@
-function settingsMenu() {
+function settingsMenu(language) {
 const settingsMenu = document.getElementById('dynamicContent');
 configureContainer(settingsMenu);
 settingsMenu.classList.add('settingsMenu-container');
-// const authenticationButton = document.createElement('button');
-updateMenuDimensions();
 
 const title = document.createElement('div');
 title.id = 'settingsMenuTitle';
@@ -36,17 +34,17 @@ accountButton.addEventListener('click', function() {
     accountMenu();
 });
 
-const displayButton = document.createElement('button');
-displayButton.id = 'displayButton';
-displayButton.textContent = 'Display';
-displayButton.classList.add('hoverLambda');
-displayButton.classList.add('buttonLambda');
-displayButton.addEventListener('mouseover', () => {
+const languageButton = document.createElement('button');
+languageButton.id = 'languageButton';
+languageButton.textContent = 'Language';
+languageButton.classList.add('hoverLambda');
+languageButton.classList.add('buttonLambda');
+languageButton.addEventListener('mouseover', () => {
     hoverSound.play();
 });
-displayButton.addEventListener('click', function() {
+languageButton.addEventListener('click', function() {
     playAudio('clickIn');
-    displayMenu();
+    languageMenu();
 });
 
 
@@ -74,14 +72,12 @@ backButton.addEventListener('mouseover', () => {
 });
 backButton.addEventListener('click', function() {
     playAudio('clickOut');
-    // document.body.removeChild(settingsMenu);
     mainMenu();
 });
-settingsMenu.appendChild(title);
 
+settingsMenu.appendChild(title);
 settingsMenu.appendChild(accountButton);
-settingsMenu.appendChild(gameButton);
-settingsMenu.appendChild(displayButton);
+settingsMenu.appendChild(languageButton);
 settingsMenu.appendChild(audioButton);
 settingsMenu.appendChild(backButton);
 }

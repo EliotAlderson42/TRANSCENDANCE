@@ -11,14 +11,21 @@
     margin: 1px 0;
 }
 
-.accountSettingsMenu-pseudoInput{
+.accountSettingsMenu-input{
     width: 140px;
     font-weight: bold;
     text-align: center;
+    color: black;
 }
 
-.accountSettingsMenu-pseudoText{
+.accountSettingsMenu-text{
     color: white;
     font-style: bold;
-    font-size: 12.0em;
+    font-size: 1em;
+}
+
+.accountSettingsMenu-uploadButton{
+    width: auto;
+    height: auto;
+    margin-top: 1vh;
 }
