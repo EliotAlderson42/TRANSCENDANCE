@@ -1,10 +1,12 @@
 services:
   db:
-    image: postgres:13
+    image: postgres:latest
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
@@ -12,26 +14,32 @@ services:
 
   backend:
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
+    command: daphne -p 8000 Transcendance.asgi:application  # Utiliser Daphne ici
     volumes:
-      - ./backend/transcendance:/app
+      - ./backend:/app
     ports:
       - 8000:8000
     env_file:
       - transcendance.env
     depends_on:
       - db
+      - redis
 
-  frontend:
-    build: ./frontend
-    image: nginx:alpine
-    volumes:
-      - ./frontend:/usr/share/nginx/html
-      - ./frontend/nginx.conf:/etc/nginx/nginx.conf
+  redis:
+    image: redis:latest
     ports:
-      - 8080:80
-    depends_on:
-      - backend
+      - "6380:6379"
+
+  # frontend:
+  #   build: ./frontend
+  #   image: nginx:alpine
+  #   volumes:
+  #     - ./frontend:/usr/share/nginx/html
+  #     - ./frontend/nginx.conf:/etc/nginx/nginx.conf
+  #   ports:
+  #     - 8080:80
+  #   depends_on:
+  #     - backend
 
 volumes: 
   postgres_data:
