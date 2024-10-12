@@ -1,0 +1,13 @@
+.audioMenu-ambientText, .audioMenu-soundText{
+    font-size: 1em;
+    color:white;
+    font-style: bold;
+    margin-top: 1vh;
+}
+
+.audioMenu-ambientVolumeSlider, .audioMenu-soundVolumeSlider{
+    width: 30%;
+    range: 0, 100;
+    margin-top: 0.5vh;
+}
+
