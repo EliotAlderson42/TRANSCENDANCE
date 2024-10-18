@@ -1,83 +1,49 @@
-function settingsMenu(language) {
-const settingsMenu = document.getElementById('dynamicContent');
-configureContainer(settingsMenu);
-settingsMenu.classList.add('settingsMenu-container');
+class settingsMenu extends HTMLElement{
+    constructor() {
+        super()
+    }
 
-const title = document.createElement('div');
-title.id = 'settingsMenuTitle';
-title.textContent = 'Settings';
-title.classList.add('menusTitle');
+    connectedCallback() {
+        this.innerHTML = `
+        <div id = "dynamicContent">
+        <h1 id="settingsMenuTitle" class="menusTitle">Settings</h1>
+        <button id="accountButton" class="hoverLambda buttonLambda">Account</button>
+        <button id="languageButton" class="hoverLambda buttonLambda">Language</button>
+        <button id="audioButton" class="hoverLambda buttonLambda">Audio</button>
+        <button id="backButton" class="hoverLambda backButtons">Back</button>
+        </div>
+        `;
+        
+        this.querySelector('#accountButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#accountButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            accountMenu.show();
+        });
+        
+        this.querySelector('#languageButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#languageButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            languageMenu.show();
+        });
 
-const gameButton = document.createElement('button');
-gameButton.id = 'gameButton';
-gameButton.textContent = 'Game';
-gameButton.classList.add('hoverLambda');
-gameButton.classList.add('buttonLambda');
-gameButton.addEventListener('mouseover', () => {
-    hoverSound.play();
-});
-gameButton.addEventListener('click', function() {
-    playAudio('clickIn');
-    gameMenu();
-});
+        this.querySelector('#audioButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#audioButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            audioMenu.show();
+        });
 
-const accountButton = document.createElement('button');
-accountButton.id = 'accountButton';
-accountButton.textContent = 'Account';
-accountButton.classList.add('hoverLambda');
-accountButton.classList.add('buttonLambda');
-accountButton.addEventListener('mouseover', () => {
-    hoverSound.play();
-});
-accountButton.addEventListener('click', function() {
-    playAudio('clickIn');
-    accountMenu();
-});
-
-const languageButton = document.createElement('button');
-languageButton.id = 'languageButton';
-languageButton.textContent = 'Language';
-languageButton.classList.add('hoverLambda');
-languageButton.classList.add('buttonLambda');
-languageButton.addEventListener('mouseover', () => {
-    hoverSound.play();
-});
-languageButton.addEventListener('click', function() {
-    playAudio('clickIn');
-    languageMenu();
-});
-
-
-const audioButton = document.createElement('button');
-audioButton.id = 'audioButton';
-audioButton.textContent = 'Audio';
-audioButton.classList.add('hoverLambda');
-audioButton.classList.add('buttonLambda');
-audioButton.addEventListener('mouseover', () => {
-    hoverSound.play();
-});
-audioButton.addEventListener('click', function() {
-    playAudio('clickIn');
-    audioMenu();
-});
-
-const backButton = document.createElement('button');
-backButton.id = 'settingsBackButton';
-backButton.textContent = 'Back';
-backButton.classList.add('hoverLambda');
-backButton.classList.add('backButtons');
-backButton.addEventListener('mouseover', () => {
-    hoverSound.currentTime = 0;
-    hoverSound.play();
-});
-backButton.addEventListener('click', function() {
-    playAudio('clickOut');
-    mainMenu();
-});
-
-settingsMenu.appendChild(title);
-settingsMenu.appendChild(accountButton);
-settingsMenu.appendChild(languageButton);
-settingsMenu.appendChild(audioButton);
-settingsMenu.appendChild(backButton);
+        this.querySelector('#backButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#backButton').addEventListener('click', () => {
+            playAudio('clickOut');
+            mainMenu();
+        });
+    }
+    static show() {
+        const settingsMenu = document.getElementById('dynamicContent');
+        settingsMenu.innerHTML = '';
+        const settingsMenuComponent = document.createElement('settings-menu');
+        settingsMenu.appendChild(settingsMenuComponent);
+    }
 }
+
+customElements.define('settings-menu', settingsMenu);

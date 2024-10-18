@@ -1,139 +1,69 @@
-function accountMenu(){
-    const accountMenu = document.getElementById('dynamicContent');
-    configureContainer(accountMenu);
+class accountMenu extends HTMLElement {
+    constructor() {
+        super();
+    }
 
-    const title = document.createElement('div');
-    title.id = 'accountMenuTitle';
-    title.textContent = 'Account settings';
-    title.style.marginTop = '5vh';
-    title.classList.add('menusTitle');
+    connectedCallback() {
+        this.innerHTML = `
+            <div id="dynamicContent">
+                <h1 id="accountMenuTitle" class="menusTitle" style="margin-top: 5vh;">Account settings</h1>
+                <button id="upButton" class="hoverLambda accountMenu-upButton"></button>
+                <img src="image/image.jpg" width="140" height="140" style="border: 3px solid white;" class="accountMenu-image">
+                <button id="downButton" class="hoverLambda accountMenu-downButton"></button>
+                <button id="uploadButton" class="hoverLambda accountMenu-uploadButton">upload</button>
+                <div id="idText" class="accountMenu-text" style="margin-top: 2vh;">Id</div>
+                <input id="idInput" class="accountMenu-input stealthButton" style="background-color: darkGrey;" readonly>
+                <div id="idErrorMess" style="color: red; visibility: hidden;">42 IDs are not editable</div>
+                <div id="passwordText" class="accountMenu-text">Password</div>
+                <input id="passwordInput" class="accountMenu-input stealthButton" style="background-color: darkGrey;" readonly>
+                <div id="passwordErrorMess" style="color: red; visibility: hidden;">42 Passwords are not editable</div>
+                <div id="pseudoText" class="accountMenu-text">Nickname</div>
+                <input id="pseudoInput" class="accountMenu-input">
+                <button id="accountBackButton" class="hoverLambda backButtons">Back</button>
+            </div>
+        `;
 
-    const upButton = document.createElement('button');
-    upButton.id = 'upButton';
-    upButton.textContent = '';
-    upButton.classList.add('hoverLambda');
-    upButton.classList.add('accountMenu-upButton');
-    // upButton.style.marginTop = '0.5vh';
-    upButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-    upButton.addEventListener('click', () => {
-        playAudio('clickIn');
-        image.src = 'image/image5.jpg';
-    });
+        this.querySelector('#upButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#upButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            this.querySelector('img').src = 'image/image5.jpg';
+        });
 
-    const image = document.createElement('img');
-    image.src = 'image/image.jpg'; 
-    image.width = 140;
-    image.height = 140;
-    image.style.border = '3px solid white';
-    image.classList.add('accountMenu-image');
+        this.querySelector('#downButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#downButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            this.querySelector('img').src = 'image/image4.jpg';
+        });
 
-    const downButton = document.createElement('button');
-    downButton.id = 'downButton';
-    downButton.textContent = '';
-    downButton.classList.add('hoverLambda');
-    downButton.classList.add('accountMenu-downButton');
-    downButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-    downButton.addEventListener('click', () => {
-        playAudio('clickIn');
-        image.src = 'image/image4.jpg'; 
-    });
+        this.querySelector('#uploadButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#uploadButton').addEventListener('click', () => playAudio('clickIn'));
 
-    const uploadButton = document.createElement('button');
-    uploadButton.id = 'uploadButton';
-    uploadButton.textContent = 'upload';
-    uploadButton.classList.add('hoverLambda');
-    uploadButton.classList.add('accountMenu-uploadButton');
-    uploadButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-    uploadButton.addEventListener('click', () => {
-        playAudio('clickIn');
-    });
+        this.querySelector('#idInput').addEventListener('click', () => {
+            const idErrorMess = this.querySelector('#idErrorMess');
+            idErrorMess.style.visibility = 'visible';
+            idErrorMess.style.opacity = '1';
+        });
 
-    const idText = document.createElement('div');
-    idText.id = 'idText';
-    idText.textContent = 'Id';
-    idText.classList.add('accountMenu-text');
-    idText.style.marginTop = '2vh';
+        this.querySelector('#passwordInput').addEventListener('click', () => {
+            const passwordErrorMess = this.querySelector('#passwordErrorMess');
+            passwordErrorMess.style.visibility = 'visible';
+            passwordErrorMess.style.opacity = '1';
+        });
 
-    const idInput = document.createElement('input');
-    idInput.id = 'idInput';
-    idInput.classList.add('accountMenu-input');
-    idInput.style.backgroundColor = 'darkGrey';
-    idInput.classList.add('stealthButton');
-    idInput.readOnly = true;
-    idInput.addEventListener('click', () => {
-        idErrorMess.style.visibility = 'visible';
-        idErrorMess.style.opacity = '1';
-    });
+        this.querySelector('#accountBackButton').addEventListener('click', () => {
+            playAudio('clickOut');
+            settingsMenu.show();
+        });
+        this.querySelector('#accountBackButton').addEventListener('mouseover', () => hoverSound.play());
+        
+    }
 
-    const idErrorMess = document.createElement('div');
-    idErrorMess.id = 'idErrorMess';
-    idErrorMess.textContent = '42 IDs are not editable';
-    idErrorMess.style.color = 'red';
-    idErrorMess.style.visibility = 'hidden';
-
-    const passwordText = document.createElement('div');
-    passwordText.id = 'passwordText';
-    passwordText.textContent = 'Password';
-    passwordText.classList.add('accountMenu-text');
-
-    const passwordInput = document.createElement('input');
-    passwordInput.id = 'passwordInput';
-    passwordInput.classList.add('accountMenu-input');
-    passwordInput.style.backgroundColor = 'darkGrey';
-    passwordInput.classList.add('stealthButton');
-    passwordInput.readOnly = true;
-    passwordInput.addEventListener('click', () => {
-        passwordErrorMess.style.visibility = 'visible';
-        passwordErrorMess.style.opacity = '1';
-    });
-
-    const passwordErrorMess = document.createElement('div');
-    passwordErrorMess.id = 'passwordErrorMess';
-    passwordErrorMess.textContent = '42 Passwords are not editable';
-    passwordErrorMess.style.color = 'red';
-    passwordErrorMess.style.visibility = 'hidden';
-
-    const pseudoText = document.createElement('div');
-    pseudoText.id = 'pseudoText';
-    pseudoText.textContent = 'Nickname';
-    pseudoText.classList.add('accountMenu-text');
-
-    const pseudoInput = document.createElement('input');
-    pseudoInput.id = 'pseudoInput';
-    pseudoInput.classList.add('accountMenu-input');
-    
-    const backButton = document.createElement('button');
-    backButton.id = 'accountBackButton';
-    backButton.textContent = 'Back';
-    backButton.classList.add('hoverLambda');
-    backButton.classList.add('backButtons');
-    backButton.addEventListener('click', () => {
-        playAudio('clickOut');
-        settingsMenu();
-    });
-    backButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-
-
-    accountMenu.appendChild(title);
-    accountMenu.appendChild(upButton);
-    accountMenu.appendChild(image);
-    accountMenu.appendChild(downButton);
-    accountMenu.appendChild(uploadButton);
-    accountMenu.appendChild(idText);
-    accountMenu.appendChild(idInput);
-    accountMenu.appendChild(idErrorMess);
-    accountMenu.appendChild(passwordText);
-    accountMenu.appendChild(passwordInput);
-    accountMenu.appendChild(passwordErrorMess);
-    accountMenu.appendChild(pseudoText);
-    accountMenu.appendChild(pseudoInput);
-    accountMenu.appendChild(backButton);
+    static show() {
+        const accountMenu = document.getElementById('dynamicContent');
+        accountMenu.innerHTML = '';
+        const accountMenuComponent = document.createElement('account-menu');
+        accountMenu.appendChild(accountMenuComponent);
+    }
 }
+
+customElements.define('account-menu', accountMenu);

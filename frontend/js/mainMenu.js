@@ -30,53 +30,59 @@ function mainMenu() {
     
     const container = document.getElementById('dynamicContent');
     configureContainer(container);
-    
+
     const pong = document.createElement('button');
     pong.id = 'pongButton';
     // pong.classList.add('mainMenu-pongButton');
-    pong.textContent = 'Pong';
+    pong.textContent = 'PONG';
     pong.style.fontSize = '12em';
     pong.style.color = 'white';
     pong.classList.add('FadeIn');
     pong.classList.add('stealthButton');
     pong.style.marginBottom = '0.1em';
-    container.appendChild(pong);
-    
+
     const play = document.createElement('button');
     play.id = 'playButton';
     play.textContent = 'Play';
     play.classList.add('buttonLambda');
     play.classList.add('hoverLambda');
-    setTimeout(function() {
-        play.classList.add('FadeIn');
-    }, 30);
     play.addEventListener('click', function() {
-        playAudio('clickIn');                
+        playAudio('clickIn');
+        playMenu.show();
     });
     play.addEventListener('mouseover', () => {
-        hoverSound.currentTime = 0;
         hoverSound.play();
     });
-    container.appendChild(play);
-    
+
     const settings = document.createElement('button');
     settings.id = 'settingsButton';
     settings.textContent = 'Settings';
     settings.classList.add('buttonLambda');
     settings.classList.add('hoverLambda');
-    setTimeout(function() {
-        settings.classList.add('FadeIn');
-    }, 30);
     settings.addEventListener('click', function() {
         playAudio('clickIn');
-        settingsMenu();
+        settingsMenu.show();
     });
     settings.addEventListener('mouseover', () => {
-        hoverSound.currentTime = 0;
         hoverSound.play();
     });
+
+    const authenticate = document.createElement('button');
+    authenticate.id = 'authenticateButton';
+    authenticate.textContent = 'Authenticate';
+    authenticate.classList.add('buttonLambda');
+    authenticate.classList.add('hoverLambda');
+
+    authenticate.addEventListener('click', function() {
+        playAudio('clickIn');
+        authenticationMenu.show();
+    });
+    authenticate.addEventListener('mouseover', () => {
+        hoverSound.play();
+    });
+
+    container.appendChild(pong);
+    container.appendChild(play);
     container.appendChild(settings);
-    
-    
-    
+    container.appendChild(authenticate);
 }

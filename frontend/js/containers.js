@@ -1,10 +1,10 @@
 function configureContainer(container) {
     container.innerHTML = '';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.justifyContent = 'center'; // Center horizontally
-    container.style.alignItems = 'center'; // Center vertically if needed
-    container.style.overflow = 'auto';
+    // container.style.display = 'flex';
+    // container.style.flexDirection = 'column';
+    // container.style.justifyContent = 'center'; 
+    // container.style.alignItems = 'center'; 
+    // container.style.overflow = 'auto';
     container.style.zIndex = '1000';
 }
 
@@ -31,9 +31,9 @@ menus.forEach(menu => {
 });
 }
 
-document.addEventListener('DOMContentLoaded', updateMenuDimensions);
-window.addEventListener('resize', updateMenuDimensions);
-window.addEventListener('scroll', updateMenuDimensions);
+// document.addEventListener('DOMContentLoaded', updateMenuDimensions);
+ window.addEventListener('resize', updateMenuDimensions);
+// window.addEventListener('scroll', updateMenuDimensions);
 
 function newWindowGrid(){
     const newWindow = document.createElement('div');

@@ -72,7 +72,6 @@
 
 .hoverLambda:hover{
   transform: scale(1.01);
-  background-color: #f0f0f0; 
 }
 
 .stealthButton{
@@ -101,8 +100,17 @@
 .buttonLambda{
   display: inline-block;
   font-size: 2em;
-  margin-top: 0.3vw;
+  margin-top: 0.2vh;
   width: 50%;
+}
+
+.inputLambda{
+  width: 15%;
+  height: 3%;
+  margin-top: 0.2vh;
+  font-weight: bold;
+  text-align: center;
+  color: black;
 }
 
 .backButtons{
@@ -110,22 +118,26 @@
   margin-top: 3vw;
 }
 
-
 body{
   margin: 0;
   padding: 0;
-  height: 100vh;
+  height: 80vh;
   background: linear-gradient(-25deg, #9f0d0d, #000000, #101455);
   background-size: 400% 400%;
 }
 
 #dynamicContent{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow : hidden;
   padding: 1vw;
   margin: 15vh auto;
   width: 57vw; /* Largeur relative à la fenêtre du navigateur */
   height: 60vh;
   border: 2px solid #000000;
   background-color: #000000;
-  box-sizing: border-box;
   position: relative;
 }

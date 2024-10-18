@@ -1,69 +1,51 @@
+class languageMenu extends HTMLElement {
+    constructor() {
+        super();
+    }
 
-function languageMenu(){
-    const languageMenu = document.getElementById('dynamicContent');
-    configureContainer(languageMenu);
+    connectedCallback() {
+        this.innerHTML = `
+        <div id="dynamicContent">
+            <h1 id="languageMenuTitle" class="menusTitle">Language</h1>
+            <button id="englishButton" class="hoverLambda buttonLambda">EN</button>
+            <button id="frenchButton" class="hoverLambda buttonLambda">FR</button>
+            <button id="spanishButton" class="hoverLambda buttonLambda">ES</button>
+            <button id="backButton" class="hoverLambda backButtons">Back</button>
+        </div>
+        `;
 
-    const title = document.createElement('div');
-    title.id = 'languageMenuTitle';
-    title.textContent = 'Language';
-    title.classList.add('menusTitle');
+        this.querySelector('#englishButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#englishButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            //language = 'english';
+        });
 
-    
-    const englishButton = document.createElement('button');
-    englishButton.id = 'englishButton';
-    englishButton.textContent = 'EN';
-    englishButton.classList.add('hoverLambda');
-    englishButton.classList.add('buttonLambda');
-    englishButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-    englishButton.addEventListener('click', () => {
-        playAudio('clickIn');
-        switchLanguage('en');
-    });
-    
-    const frenchButton = document.createElement('button');
-    frenchButton.id = 'frenchButton';
-    frenchButton.textContent = 'FR';
-    frenchButton.classList.add('hoverLambda');
-    frenchButton.classList.add('buttonLambda');
-    frenchButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-    frenchButton.addEventListener('click', () => {
-        playAudio('clickIn');
-        switchLanguage('fr');
-    });
+        this.querySelector('#frenchButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#frenchButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            //language = 'french';
+        });
 
-    const spanishButton = document.createElement('button');
-    spanishButton.id = 'spanishButton';
-    spanishButton.textContent = 'ES';
-    spanishButton.classList.add('hoverLambda');
-    spanishButton.classList.add('buttonLambda');
-    spanishButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-    spanishButton.addEventListener('click', () => {
-        playAudio('clickIn');
-        switchLanguage('es');
-    });
+        this.querySelector('#spanishButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#spanishButton').addEventListener('click', () => {
+            playAudio('clickIn');
+            //language = 'spanish';
+        });
 
-    const backButton = document.createElement('button');
-    backButton.id = 'languageBackButton';
-    backButton.textContent = 'Back';
-    backButton.classList.add('hoverLambda');
-    backButton.classList.add('backButtons');
-    backButton.addEventListener('click', () => {
-        playAudio('clickOut');
-        settingsMenu();
-    });
-    backButton.addEventListener('mouseover', () => {
-        hoverSound.play();
-    });
-
-    languageMenu.appendChild(title);
-    languageMenu.appendChild(englishButton);
-    languageMenu.appendChild(frenchButton);
-    languageMenu.appendChild(spanishButton);
-    languageMenu.appendChild(backButton);
+        this.querySelector('#backButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#backButton').addEventListener('click', () => {
+            playAudio('clickOut');
+            settingsMenu.show();
+        });
 }
+
+
+    static show() {
+        const languageMenu = document.getElementById('dynamicContent');
+        languageMenu.innerHTML = '';
+        const languageMenuComponent = document.createElement('language-menu');
+        languageMenu.appendChild(languageMenuComponent);
+    }
+}
+
+customElements.define('language-menu', languageMenu);
