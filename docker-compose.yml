@@ -12,34 +12,51 @@ services:
     env_file:
       - transcendance.env
 
-  backend:
-    build: ./backend
-    command: daphne -p 8000 Transcendance.asgi:application  # Utiliser Daphne ici
-    volumes:
-      - ./backend:/app
-    ports:
-      - 8000:8000
-    env_file:
-      - transcendance.env
-    depends_on:
-      - db
-      - redis
-
   redis:
     image: redis:latest
     ports:
       - "6380:6379"
 
-  # frontend:
-  #   build: ./frontend
-  #   image: nginx:alpine
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./transcendance.env
+    depends_on:
+      - db
+
+
+  # backend:
+  #   build: ./backend
+  #   command: ./wait-for-it.sh db:5432 -- ./wait-for-it.sh redis:6379 -- daphne -p 8000 Transcendance.asgi:application # Utiliser Daphne ici
   #   volumes:
-  #     - ./frontend:/usr/share/nginx/html
-  #     - ./frontend/nginx.conf:/etc/nginx/nginx.conf
+  #     - ./backend:/app
   #   ports:
-  #     - 8080:80
+  #     - 8000:8000
+  #   env_file:
+  #     - transcendance.env
   #   depends_on:
-  #     - backend
+  #     - db
+  #     - redis
+
+
+  frontend:
+    build: ./frontend
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8080:80
+    depends_on:
+      - backend
 
 volumes: 
   postgres_data:

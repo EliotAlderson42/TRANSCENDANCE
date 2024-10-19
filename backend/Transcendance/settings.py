@@ -10,26 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+g7s0tty$jfz5y+@&n6mdmh&(uwn*^#rsc0-78&bmgo9*nm@ib'
+SECRET_KEY = 'django-insecure-!3ccnz&l1)0g3yj6ahqj)*=q6zad0qc4(8e=spx87)o0-q6n-7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 
 # Application definition
@@ -41,20 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
     'pong',
 ]
-
-ASGI_APPLICATION = 'Transcendance.asgi.application'
-
-CHANNEL_LAYERS = {
-        'default' : {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG' : {
-                "hosts": [('127.0.0.1', 6380)],
-            },
-        },
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,7 +55,7 @@ ROOT_URLCONF = 'Transcendance.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR/'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -96,8 +80,8 @@ DATABASES = {
         'NAME': 'mydatabase',
         'USER': 'myuser',
         'PASSWORD': 'mypassword',
-        'HOST': 'db',
-        'PORT': '5432',
+        'HOST': 'db',  # Ou l'adresse IP de votre serveur PostgreSQL
+        'PORT': '5432',       # Le port par défaut pour PostgreSQL
     }
 }
 
