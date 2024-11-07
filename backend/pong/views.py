@@ -1,43 +1,60 @@
-from django.shortcuts import render , redirect
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from .models import *
-from django.http import HttpResponse , JsonResponse
+from .game_service import find_or_create_game 
+from django.shortcuts import render
 
 # Create your views here.
 
 def home(request):
-		return render(request, 'home.html')
+    return render(request, 'index.html')
 
-def room(request, room):
-	username = request.GET.get('username')
-	room_details = Room.objects.get(name=room)
-	return render(request, 'room.html', {
-		'username' : username ,
-		'room' : room ,
-		'room_details' : room_details
-	})	
+@api_view(['POST'])
+def start_game(request):
+	player = None #request.user pour plus tard quand l'authetification sera faite
+	game, player_side = find_or_create_game(player)
 
-def checkview(request):
-	room = request.POST['room_name']
-	username = request.POST['username']
-	print("gello")
+	return Response({
+		"game_id": game.id,
+		'player_side': player_side 
+		# if game.player_left == player else 'right'
+		})
 
-	if Room.objects.filter(name = room).exists():
-		return redirect('/' + room + '/?username' + username)
-	else:
-		new_room = Room.objects.create(name = room)
-		new_room.save()
-		return redirect('/' + room + '/?username=' + username)
-	
-def send(request):
-	message = request.POST['message']
-	username = request.POST['username']
-	room_id = request.POST['room_id']
+@api_view(['GET'])
+def game_data(request, game_id):
+	game = PongGame.objects.get(id=game_id)
+	game.update_position()
+	game.save()
+	data = {
+		'ball': {'x': game.ball_x, 'y' : game.ball_y},
+		'left_paddle': {'y': game.left_paddle_y},
+		'right_paddle': {'y': game.right_paddle_y},
+		'score': {'left': game.left_score, 'right': game.right_score}
+	}
+	return Response(data)
 
+@api_view(['POST'])
+def player_action(request, game_id):
+	game = PongGame.objects.get(id=game_id)
+	action = request.data.get('action')
+	player = request.data.get('player')
 
-	new_message = Message.objects.create(value=message, user=username, room=room_id)
-	return HttpResponse('Message envover avec succes')
+	if player == 'left':
+		if action == 'moove_up':
+			game.left_paddle_y = max(game.left_paddle_y - 10, 0)
+		elif action == 'moove_down':
+			game.left_paddle_y = min(game.left_paddle_y + 10, 500)
+	elif player == 'right':
+		if action == 'moove_up':
+			game.right_paddle_y = max(game.right_paddle_y - 10, 0)
+		elif action == 'moove_down':
+			game.right_paddle_y = min(game.right_paddle_y + 10, 500)
+	game.save()
+	return Response({"message": "Action Received"})
 
-def getMessages(request, room):
-	room_details = Room.objects.get(name=room)
-	messages = Message.objects.filter(room = room_details.id).order_by('date')
-	return JsonResponse({"messages" :list(messages.values())} )
+# @api_view(['POST'])
+# def update_game(request, game_id):
+# 		game = PongGame.objects.get(id=game_id)
+# 		game.update_positions()
+# 		game.save()
+# 		return Response({"messsage": "Game Updated"})
