@@ -1,6 +1,7 @@
 class friendsMenu extends HTMLElement {
     constructor() {
         super();
+        this.statusUpdateCallback = this.updateFriendStatus.bind(this);
     }
 
     async getCsrfToken() {
@@ -49,47 +50,46 @@ class friendsMenu extends HTMLElement {
             mainMenu.show();
             return;
         }
-
+    
         this.loadFriends();
         this.loadFriendRequests();
         this.setupEventListeners();
-        if (window.userStatusSocket) {
-            window.userStatusSocket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.type === 'status_update') {
-                    this.updateFriendStatus(data.user_id, data.is_online);
-                }
-            };
+    
+        // Utiliser uniquement userStatusManager
+        if (window.userStatusManager) {
+            window.userStatusManager.addStatusListener(this.statusUpdateCallback);
+            window.userStatusManager.connect(); // S'assurer que le WebSocket est connecté
         }
+    
+        // Polling pour les demandes d'amis
         setInterval(() => {
             this.loadFriendRequests();
         }, 5000);
-
-        if (window.userStatusManager) {
-            const updateStatus = (userId, isOnline) => {
-                const friendItem = this.querySelector(`[data-user-id="${userId}"]`);
-                if (friendItem) {
-                    const statusElement = friendItem.querySelector('.friend-status');
-                    if (statusElement) {
-                        statusElement.className = `friend-status ${isOnline ? 'online' : 'offline'}`;
-                        statusElement.textContent = isOnline ? 'Online' : 'Offline';
-                    }
-                }
-            };
-            
-            window.userStatusManager.addStatusListener(updateStatus);
-            
-            // Nettoyer l'écouteur quand le composant est détruit
-            this.addEventListener('disconnectedCallback', () => {
-                window.userStatusManager.removeStatusListener(updateStatus);
-            });
-        }
+    
         // Définir les fonctions globales
         window.sendFriendRequest = this.sendFriendRequest.bind(this);
         window.handleFriendRequest = this.handleFriendRequest.bind(this);
         window.inviteToPlay = this.inviteToPlay.bind(this);
     }
-
+    
+    disconnectedCallback() {
+        // Nettoyer uniquement l'écouteur de userStatusManager
+        if (window.userStatusManager) {
+            window.userStatusManager.removeStatusListener(this.statusUpdateCallback);
+        }
+    }
+        
+    updateFriendStatus(userId, isOnline) {
+        const friendItem = this.querySelector(`[data-user-id="${userId}"]`);
+        if (friendItem) {
+            const statusElement = friendItem.querySelector('.friend-status');
+            if (statusElement) {
+                statusElement.className = `friend-status ${isOnline ? 'online' : 'offline'}`;
+                statusElement.textContent = isOnline ? 'Online' : 'Offline';
+            }
+        }
+    }
+    
     async loadFriends() {
         try {
             const response = await fetch('http://localhost:8000/auth/friends/', {

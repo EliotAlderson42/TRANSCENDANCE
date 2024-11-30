@@ -97,7 +97,6 @@ class logInMenu extends HTMLElement {
         }
 
         if (fortytwoButton) {
-            fortytwoButton.addEventListener('mouseover', () => hoverSound.play());
             fortytwoButton.addEventListener('click', async () => {
                 playAudio('clickIn');
                 try {
@@ -106,11 +105,11 @@ class logInMenu extends HTMLElement {
                     const authToken = cookies.find(cookie => cookie.trim().startsWith('auth_token='));
                     
                     if (authToken) {
-                        // Si nous sommes déjà authentifiés, aller directement au menu principal
+                        window.userStatusService.connect(); // Ajoutez cette ligne
                         mainMenu.show();
                         return;
                     }
-    
+                            
                     const response = await fetch('http://localhost:8000/auth/42/login/');
                     const data = await response.json();
                     if (data.auth_url) {
@@ -124,7 +123,7 @@ class logInMenu extends HTMLElement {
                 }
             });    
         }
-
+        
         if (backButton) {
             backButton.addEventListener('mouseover', () => hoverSound.play());
             backButton.addEventListener('click', () => {
@@ -145,11 +144,10 @@ class logInMenu extends HTMLElement {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Vérifier d'abord le localStorage
+    // 1. D'abord vérifier le localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
         try {
-            // Nettoyer la chaîne avant le parsing
             const cleanedData = storedUser.trim();
             const userData = JSON.parse(cleanedData);
             
@@ -160,35 +158,31 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         } catch (error) {
             console.error('Error parsing stored user:', error);
-            console.log('Raw stored user data:', storedUser); // Debug
+            console.log('Raw stored user data:', storedUser);
         }
     }
 
-    // Si pas dans localStorage, vérifier le hash (pour OAuth 42)
+    // 2. Vérifier le hash pour OAuth 42
     if (window.location.hash.startsWith('#auth=')) {
         try {
             const encoded = window.location.hash.substring(6);
             const decoded = atob(encoded);
-            // Nettoyer la chaîne décodée
-            const cleanedData = decoded.trim().replace(/^\s+|\s+$/g, '');
-            console.log('Cleaned data:', cleanedData); // Debug
-            
-            const userData = JSON.parse(cleanedData);
+            const userData = JSON.parse(decoded);
             
             localStorage.setItem('user', JSON.stringify(userData));
             window.location.hash = '';
+            window.userStatusManager.connect();
             document.dispatchEvent(new CustomEvent('userAuthenticated', { 
                 detail: userData 
             }));
             mainMenu.show();
+            return;
         } catch (error) {
             console.error('Error parsing auth data:', error);
-            console.log('Raw hash data:', window.location.hash); // Debug
         }
     }
-});
 
-document.addEventListener('DOMContentLoaded', () => {
+    // 3. Vérifier les cookies
     const cookies = document.cookie.split(';');
     console.log("All cookies:", cookies);
 
@@ -203,19 +197,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let decodedValue = decodeURIComponent(userValue);
             console.log("After first decode:", decodedValue);
 
-            // Nettoyage plus simple et direct
             const cleanedValue = decodedValue
-                .replace(/\\"/g, '"')  // Remplace \" par "
-                .replace(/\\054/g, ',') // Remplace \054 par ,
-                .replace(/\\\\/g, '\\') // Remplace \\ par \
-                // Enlever les guillemets au début et à la fin si présents
+                .replace(/\\"/g, '"')
+                .replace(/\\054/g, ',')
+                .replace(/\\\\/g, '\\')
                 .replace(/^"/, '')
                 .replace(/"$/, '')
                 .trim();
             
             console.log("Cleaned value:", cleanedValue);
             
-            // Tenter de parser le JSON
             const userData = JSON.parse(cleanedValue);
             console.log("Parsed data:", userData);
 
@@ -223,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 detail: userData
             }));
             mainMenu.show();
-
         } catch (error) {
             console.error('Error parsing user data:', error);
             console.log('Raw cookie value:', userCookie);
@@ -231,4 +221,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-customElements.define('log-in-menu', logInMenu);
+customElements.define('log-in-menu', logInMenu);X

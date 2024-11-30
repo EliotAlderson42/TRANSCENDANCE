@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.utils import timezone
+from datetime import datetime
 from django.shortcuts import redirect
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -203,24 +204,24 @@ def update_avatar(request):
 
 @api_view(['POST'])
 def logout_api(request):
-    user = request.user
-    if user.is_authenticated:
-        user_id = user.id
-        user.is_online = False
-        user.save()
-        
-        # Notifier les autres utilisateurs via WebSocket
+    if request.user.is_authenticated:
+        user_id = request.user.id
         channel_layer = get_channel_layer()
+        
         async_to_sync(channel_layer.group_send)(
             "users",
             {
                 "type": "user_status",
-                "user_id": user_id,
-                "is_online": False
+                "user_id": str(user_id),
+                "is_online": False,
+                "timestamp": timezone.now().isoformat() 
             }
         )
         
-    logout(request)
+        request.user.is_online = False
+        request.user.save()
+        logout(request)
+    
     return Response({'message': 'Successfully logged out'})
 
 @api_view(['GET'])
