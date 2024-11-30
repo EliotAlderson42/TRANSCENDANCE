@@ -9,7 +9,7 @@ class playMenu extends HTMLElement {
             <h1 id="playMenuTitle" class="menusTitle">Play</h1>
             <button id="localButton" class="hoverLambda buttonLambda">Local</button>
             <button id="onlineButton" class="hoverLambda buttonLambda">Online</button>
-            <button id="profileButton" class="hoverLambda buttonLambda">Profile</button>
+            <button id="friendsButton" class="hoverLambda buttonLambda">Friends</button>
             <button id="backButton" class="hoverLambda backButtons">Back</button>
         </div>
         `;
@@ -26,16 +26,16 @@ class playMenu extends HTMLElement {
             onlineMenu.show();
         });
 
-        this.querySelector('#profileButton').addEventListener('mouseover', () => hoverSound.play());
-        this.querySelector('#profileButton').addEventListener('click', () => {
+        this.querySelector('#friendsButton').addEventListener('mouseover', () => hoverSound.play());
+        this.querySelector('#friendsButton').addEventListener('click', () => {
             playAudio('clickIn');
-            profileMenu.show();
+            friendsMenu.show();
         });
 
         this.querySelector('#backButton').addEventListener('mouseover', () => hoverSound.play());
         this.querySelector('#backButton').addEventListener('click', () => {
             playAudio('clickOut');
-            mainMenu();
+            mainMenu.show();
         });
     }
 

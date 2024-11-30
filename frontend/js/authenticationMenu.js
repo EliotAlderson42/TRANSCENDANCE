@@ -28,7 +28,7 @@ class authenticationMenu extends HTMLElement {
         this.querySelector('#backButton').addEventListener('mouseover', () => hoverSound.play());
         this.querySelector('#backButton').addEventListener('click', () => {
             playAudio('clickOut');
-            mainMenu();
+            mainMenu.show();
         });
     }
 

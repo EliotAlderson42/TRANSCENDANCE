@@ -12,6 +12,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# 42 OAuth settings
+FT_UID = os.getenv('FT_UID')
+FT_SECRET = os.getenv('FT_SECRET')
+FT_REDIRECT_URI = "http://localhost:5500/auth/42/callback"
+OAUTH2_REDIRECT_URI = "http://localhost:8000/auth/42/callback"
+FT_API_URL = "https://api.intra.42.fr/v2"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,22 +51,33 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',  
+    'corsheaders',    
     'channels',
     'pong',
+    'authentication',
 ]
+
+AUTH_USER_MODEL = 'authentication.User'  # Pour utiliser votre modèle User personnalisé
+
+LOGIN_URL = 'login'  # URL de redirection si un utilisateur non connecté essaie d'accéder à une page protégée
+LOGIN_REDIRECT_URL = 'home'  # URL de redirection après connexion réussie
 
 ASGI_APPLICATION = 'Transcendance.asgi.application'
 
 CHANNEL_LAYERS = {
         'default' : {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG' : {
-                "hosts": [('127.0.0.1', 6380)],
-            },
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+            # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            # 'CONFIG' : {
+            #     "hosts": [('redis', 6379)],
+            # },
         },
 }
 
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,12 +87,82 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5500",
+    "http://localhost:8000"
+]
+
+# Configuration des médias pour les avatars
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Configurations pour le stockage des fichiers
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_PERMISSIONS = 0o644
+
+# Servir les fichiers médias en développement
+if DEBUG:
+    MIDDLEWARE += [
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+    ]
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'X-CSRFToken',
+    'Content-Type',
+]
+ALLOWED_HOSTS = ['*']  # En développement seulement
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5500",
+    "http://localhost:8080",
+]
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+        'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ] if DEBUG else [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
+
 ROOT_URLCONF = 'Transcendance.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'frontend'),
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,6 +175,10 @@ TEMPLATES = [
     },
 ]
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend'),
+]
+
 WSGI_APPLICATION = 'Transcendance.wsgi.application'
 
 
@@ -93,10 +188,10 @@ WSGI_APPLICATION = 'Transcendance.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydatabase',
-        'USER': 'myuser',
-        'PASSWORD': 'mypassword',
-        'HOST': 'db',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',  # nom du service dans docker-compose
         'PORT': '5432',
     }
 }

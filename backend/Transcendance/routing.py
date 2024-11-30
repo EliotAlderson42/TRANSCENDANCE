@@ -1,13 +1,12 @@
-
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from pong.routing import websocket_urlpatterns  # Importer les WebSocket routes depuis l'application pong
+from authentication import routing as auth_routing
+from pong import routing as pong_routing
 
 application = ProtocolTypeRouter({
-    # Assurez-vous d'inclure les WebSocket routes
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            websocket_urlpatterns  # Inclure les routes WebSocket
+            auth_routing.websocket_urlpatterns + pong_routing.websocket_urlpatterns
         )
     ),
 })

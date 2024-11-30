@@ -97,20 +97,28 @@
   font-style: bold;
 }
 
-.buttonLambda{
-  display: inline-block;
-  font-size: 2em;
-  margin-top: 0.2vh;
-  width: 50%;
-}
-
-.inputLambda{
-  width: 15%;
-  height: 3%;
-  margin-top: 0.2vh;
+.inputLambda {
+  width: 15%;               /* augmenté de 15% à 30% */
+  height: 1vh;              /* augmenté à 5vh au lieu de 3% */
+  margin-top: 1vh;          /* augmenté pour plus d'espacement */
   font-weight: bold;
   text-align: center;
   color: black;
+  font-size: 0.7em;         /* ajouté pour augmenter la taille du texte */
+  padding: 1vh;             /* ajouté pour un meilleur padding interne */
+}
+
+.buttonLambda {
+  display: inline-block;
+  font-size: 2em;
+  margin-top: 0.5vh;         /* augmenté pour plus d'espacement */
+  width: 30%;              /* réduit de 50% à 30% pour matcher les inputs */
+}
+
+#fortytwoButton {
+  width: 15% !important;   /* gardé plus petit comme demandé dans ton HTML */
+  height: auto !important; /* ajusté automatiquement */
+  padding: 1vh;
 }
 
 .backButtons{
@@ -136,8 +144,73 @@ body{
   padding: 1vw;
   margin: 15vh auto;
   width: 57vw; /* Largeur relative à la fenêtre du navigateur */
-  height: 60vh;
+  height: 70vh;
   border: 2px solid #000000;
   background-color: #000000;
   position: relative;
+}
+
+
+.search-section {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px 0;
+}
+
+.search-results {
+  margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-result-item, .friend-item, .friend-request-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin: 5px 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.friend-avatar, .user-avatar {
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.friend-name, .user-name {
+  color: white;
+  flex-grow: 1;
+}
+
+.friend-status {
+  padding: 5px 10px;
+  margin: 0 10px;
+}
+
+.friend-status.online {
+  color: #4CAF50;
+}
+
+.friend-status.offline {
+  color: #f44336;
+}
+
+
+.invite-button, .add-friend-button, .accept-button, .reject-button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.friends-section, .friend-requests-section {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px 0;
+}
+
+.friends-section h2, .friend-requests-section h2 {
+  color: white;
+  margin-bottom: 10px;
 }

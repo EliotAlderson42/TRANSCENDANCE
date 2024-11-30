@@ -12,7 +12,8 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
-from pong.routing import websocket_urlpatterns
+from authentication import routing as auth_routing
+from pong import routing as pong_routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Transcendance.settings')
 
@@ -20,7 +21,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            websocket_urlpatterns  # Utiliser les routes WebSocket de l'application
+            auth_routing.websocket_urlpatterns + pong_routing.websocket_urlpatterns
         )
     ),
 })
