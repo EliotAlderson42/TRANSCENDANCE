@@ -75,9 +75,7 @@ class UserStatusManager {
     
     async refreshOnlineUsers() {
         try {
-            const response = await fetch('http://localhost:8000/auth/online-users/', {
-                credentials: 'include'
-            });
+            const response = await handleApiRequest('http://localhost:8000/auth/online-users/');
             const users = await response.json();
             this.handleOnlineUsers(users);
         } catch (error) {

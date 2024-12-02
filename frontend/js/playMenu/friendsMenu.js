@@ -92,9 +92,7 @@ class friendsMenu extends HTMLElement {
     
     async loadFriends() {
         try {
-            const response = await fetch('http://localhost:8000/auth/friends/', {
-                credentials: 'include'
-            });
+            const response = await handleApiRequest('http://localhost:8000/auth/friends/');
             const friendsData = await response.json();  // Renommé pour éviter le conflit
             console.log("Received friends data:", friendsData);
             
@@ -127,9 +125,7 @@ class friendsMenu extends HTMLElement {
         }
 
         try {
-            const response = await fetch('http://localhost:8000/auth/friend-requests/', {
-                credentials: 'include'
-            });
+            const response = await handleApiRequest('http://localhost:8000/auth/friend-requests/');
             const requests = await response.json();
             
             const requestsList = this.querySelector('#friendRequestsList');
@@ -172,10 +168,8 @@ class friendsMenu extends HTMLElement {
                     }
 
                     try {
-                        const response = await fetch(
-                            `http://localhost:8000/auth/search-users/?query=${encodeURIComponent(query)}`,
-                            { credentials: 'include' }
-                        );
+                        const response = await handleApiRequest(
+                            `http://localhost:8000/auth/search-users/?query=${encodeURIComponent(query)}`);
                         const users = await response.json();
                         
                         const searchResults = this.querySelector('#searchResults');
@@ -213,13 +207,8 @@ class friendsMenu extends HTMLElement {
     async sendFriendRequest(userId) {
         try {
             const csrfToken = await this.getCsrfToken();
-            const response = await fetch('http://localhost:8000/auth/send-friend-request/', {
+            const response = await handleApiRequest('http://localhost:8000/auth/send-friend-request/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                credentials: 'include',
                 body: JSON.stringify({ receiver_id: userId })
             });
 
@@ -236,13 +225,8 @@ class friendsMenu extends HTMLElement {
     async handleFriendRequest(requestId, action) {
         try {
             const csrfToken = await this.getCsrfToken();
-            const response = await fetch('http://localhost:8000/auth/handle-friend-request/', {
+            const response = await handleApiRequest('http://localhost:8000/auth/handle-friend-request/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                credentials: 'include',
                 body: JSON.stringify({
                     friendship_id: requestId,
                     action: action

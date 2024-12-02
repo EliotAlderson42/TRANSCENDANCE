@@ -176,5 +176,118 @@ function updateUIForLoggedInUser(userData) {
     }
 }
 
-// Ajoute un event listener pour vérifier l'état de connexion au chargement
+// Fonction pour faire des requêtes authentifiées
+async function authenticatedFetch(url, options = {}) {
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...getAuthHeaders(),
+                ...(options.headers || {})
+            },
+            credentials: 'include'
+        });
+
+        if (response.status === 401) {
+            localStorage.removeItem('user');
+            window.location.href = '/'; // ou votre page de login
+            throw new Error('Authentication failed');
+        }
+
+        return response;
+    } catch (error) {
+        console.error('Request failed:', error);
+        throw error;
+    }
+}
+
+// Fonction pour obtenir les headers d'authentification
+function getAuthHeaders() {
+    const userData = localStorage.getItem('user');
+    if (!userData) return {
+        'Content-Type': 'application/json'
+    };
+
+    try {
+        const user = JSON.parse(userData);
+        // Pour l'auth 42
+        if (user.token) {
+            return {
+                'Authorization': `Bearer ${user.token}`,
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()  // Ajout du CSRF token
+            };
+        }
+        // Pour l'auth classique
+        return {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()  // Ajout du CSRF token
+        };
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        return {
+            'Content-Type': 'application/json'
+        };
+    }
+}
+
+// Fonction unique pour les requêtes protégées
+async function protectedRequest(url, options = {}) {
+    const headers = getAuthHeaders();
+    console.log('Headers being sent:', headers);  // Debug
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...headers,
+                ...(options.headers || {})
+            },
+            credentials: 'include'
+        });
+        
+        return response;
+    } catch (error) {
+        console.error('Protected request failed:', error);
+        throw error;
+    }
+}
+
+// Fonction pour gérer les réponses API
+async function handleApiRequest(url, options = {}) {
+    try {
+        const response = await protectedRequest(url, options);
+        
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+            return null;
+        }
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Une erreur est survenue');
+        }
+
+        return response;
+    } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+    }
+}
+
+// Fonction pour obtenir le CSRF token
+async function getCsrfToken() {
+    try {
+        const response = await fetch('http://localhost:8000/auth/csrf/', { 
+            credentials: 'include'
+        });
+        const data = await response.json();
+        return data.csrfToken;
+    } catch (error) {
+        console.error('Error fetching CSRF token:', error);
+        return null;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', checkAuthStatus);

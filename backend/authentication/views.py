@@ -16,6 +16,7 @@ from django.shortcuts import redirect
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .oauth42 import get_42_auth_url, get_42_token, get_42_user_info, FT_TOKEN_URL, FT_UID, FT_SECRET, FT_REDIRECT_URI, FT_API_URL
+from .decorators import verify_auth
 from urllib.parse import quote
 import requests
 import json
@@ -26,6 +27,12 @@ User = get_user_model()
 
 def get_csrf_token(request):
     return JsonResponse({'csrfToken': get_token(request)})
+
+@api_view(['GET'])
+@verify_auth
+def protected_route(request):
+    # Votre logique ici
+    return Response({'message': 'Route protégée accessible'})
 
 @api_view(['GET'])
 def oauth42_login(request):
@@ -130,7 +137,16 @@ def login_api(request):
         return Response(serializer.data)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@verify_auth
+def user_info(request):
+    if request.user.is_authenticated:
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+    return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
 @api_view(['POST'])
+@verify_auth
 def update_profile(request):
     if not request.user.is_authenticated:
         return Response({'detail': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -152,8 +168,10 @@ def update_profile(request):
     except Exception as e:
         print(f"Error updating profile: {str(e)}")
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    pass
 
 @api_view(['POST'])
+@verify_auth
 def update_avatar(request):
     if not request.user.is_authenticated:
         return Response({'detail': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -203,35 +221,39 @@ def update_avatar(request):
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@verify_auth  # Assurez-vous que verify_auth est après api_view
 def logout_api(request):
-    if request.user.is_authenticated:
-        user_id = request.user.id
-        channel_layer = get_channel_layer()
+    try:
+        # Debug pour voir ce qui arrive
+        print("Headers:", request.headers)
+        print("User:", request.user)
+        print("Auth:", request.auth)
+
+        if request.user.is_authenticated:
+            user_id = request.user.id
+            channel_layer = get_channel_layer()
+            
+            async_to_sync(channel_layer.group_send)(
+                "users",
+                {
+                    "type": "user_status",
+                    "user_id": str(user_id),
+                    "is_online": False,
+                    "timestamp": timezone.now().isoformat() 
+                }
+            )
+            
+            request.user.is_online = False
+            request.user.save()
+            logout(request)
         
-        async_to_sync(channel_layer.group_send)(
-            "users",
-            {
-                "type": "user_status",
-                "user_id": str(user_id),
-                "is_online": False,
-                "timestamp": timezone.now().isoformat() 
-            }
-        )
-        
-        request.user.is_online = False
-        request.user.save()
-        logout(request)
-    
-    return Response({'message': 'Successfully logged out'})
+        return Response({'message': 'Successfully logged out'})
+    except Exception as e:
+        print("Logout error:", str(e))  # Debug pour voir l'erreur
+        return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
-def user_info(request):
-    if request.user.is_authenticated:
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-    return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-@api_view(['GET'])
+@verify_auth
 def search_users(request):
     """Recherche des utilisateurs par nom d'utilisateur ou display_name"""
     query = request.GET.get('query', '')
@@ -245,6 +267,7 @@ def search_users(request):
     return Response(UserSerializer(users, many=True).data)
 
 @api_view(['POST'])
+@verify_auth
 def send_friend_request(request):
     """Envoyer une demande d'ami"""
     receiver_id = request.data.get('receiver_id')
@@ -263,26 +286,8 @@ def send_friend_request(request):
         return Response({'detail': 'User not found'}, 
                        status=status.HTTP_404_NOT_FOUND)
 
-@api_view(['POST'])
-def handle_friend_request(request):
-    """Accepter ou rejeter une demande d'ami"""
-    friendship_id = request.data.get('friendship_id')
-    action = request.data.get('action')  # 'accept' ou 'reject'
-    
-    try:
-        friendship = Friendship.objects.get(
-            id=friendship_id, 
-            receiver=request.user,
-            status='pending'
-        )
-        friendship.status = 'accepted' if action == 'accept' else 'rejected'
-        friendship.save()
-        return Response({'detail': f'Friend request {action}ed'})
-    except Friendship.DoesNotExist:
-        return Response({'detail': 'Friend request not found'}, 
-                       status=status.HTTP_404_NOT_FOUND)
-
 @api_view(['GET'])
+@verify_auth
 def get_friends(request):
     friendships = Friendship.objects.filter(
         (Q(sender=request.user) | Q(receiver=request.user)) &
@@ -305,6 +310,7 @@ def get_friends(request):
     return Response(friends)
 
 @api_view(['GET'])
+@verify_auth
 def get_friend_requests(request):
     if not request.user.is_authenticated:
         return Response([])  # Retourne une liste vide si non authentifié
@@ -315,7 +321,31 @@ def get_friend_requests(request):
     )
     return Response(FriendshipSerializer(pending_requests, many=True).data)
 
+@api_view(['POST'])
+@verify_auth  # Ajouter ce décorateur s'il n'y est pas déjà
+def handle_friend_request(request):
+    try:
+        friendship_id = request.data.get('friendship_id')
+        action = request.data.get('action')  # 'accept' ou 'reject'
+        
+        friendship = Friendship.objects.get(
+            id=friendship_id, 
+            receiver=request.user,
+            status='pending'
+        )
+        friendship.status = 'accepted' if action == 'accept' else 'rejected'
+        friendship.save()
+        return Response({'detail': f'Friend request {action}ed'})
+    except Friendship.DoesNotExist:
+        return Response({'detail': 'Friend request not found'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Error in handle_friend_request: {str(e)}")  # Pour debug
+        return Response({'detail': str(e)}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
 @api_view(['GET'])
+@verify_auth
 def get_online_users(request):
     if not request.user.is_authenticated:
         return Response(status=status.HTTP_401_UNAUTHORIZED)

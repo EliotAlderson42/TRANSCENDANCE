@@ -20,7 +20,6 @@ load_dotenv()
 FT_UID = os.getenv('FT_UID')
 FT_SECRET = os.getenv('FT_SECRET')
 FT_REDIRECT_URI = "http://localhost:5500/auth/42/callback"
-OAUTH2_REDIRECT_URI = "http://localhost:8000/auth/42/callback"
 FT_API_URL = "https://api.intra.42.fr/v2"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

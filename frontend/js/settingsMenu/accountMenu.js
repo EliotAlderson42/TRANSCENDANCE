@@ -86,12 +86,8 @@ class accountMenu extends HTMLElement {
                     formData.append('avatar', e.target.files[0]);
         
                     const csrfToken = await this.getCsrfToken();
-                    const response = await fetch('http://localhost:8000/auth/update_avatar/', {
+                    const response = await handleApiRequest('http://localhost:8000/auth/update_avatar/', {
                         method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrfToken
-                        },
-                        credentials: 'include',
                         body: formData
                     });
         
@@ -118,13 +114,8 @@ class accountMenu extends HTMLElement {
             const displayName = this.querySelector('#pseudoInput').value;
             try {
                 const csrfToken = await this.getCsrfToken();
-                const response = await fetch('http://localhost:8000/auth/update_profile/', {
+                const response = await handleApiRequest('http://localhost:8000/auth/update_profile/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    credentials: 'include',
                     body: JSON.stringify({
                         display_name: displayName
                     })

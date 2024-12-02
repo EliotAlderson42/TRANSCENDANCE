@@ -28,19 +28,6 @@ class mainMenu extends HTMLElement {
         }
     }
 
-    async getCsrfToken() {
-        try {
-            const response = await fetch('http://localhost:8000/auth/csrf/', { 
-                credentials: 'include'
-            });
-            const data = await response.json();
-            return data.csrfToken;
-        } catch (error) {
-            console.error('Error fetching CSRF token:', error);
-            return null;
-        }
-    }
-
     connectedCallback() {
         const user = localStorage.getItem('user');
         this.innerHTML = `
@@ -93,20 +80,15 @@ class mainMenu extends HTMLElement {
             logoutButton.addEventListener('click', async () => {
                 playAudio('clickIn');
                 try {
-                    const csrfToken = await this.getCsrfToken();
-                    const response = await fetch('http://localhost:8000/auth/logout/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrfToken
-                        },
-                        credentials: 'include'
+                    const response = await handleApiRequest('http://localhost:8000/auth/logout/', {
+                        method: 'POST'
                     });
-
-                    if (!response.ok) throw new Error('Logout failed');
                     
-                    document.dispatchEvent(new Event('userLoggedOut'));
-                    localStorage.removeItem('user');
-                    authenticationMenu.show();
+                    if (response) {
+                        document.dispatchEvent(new Event('userLoggedOut'));
+                        localStorage.removeItem('user');
+                        authenticationMenu.show();
+                    }
                 } catch (error) {
                     console.error('Error during logout:', error);
                     alert('Failed to logout');

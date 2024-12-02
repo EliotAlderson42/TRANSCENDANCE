@@ -97,19 +97,10 @@ class logInMenu extends HTMLElement {
         }
 
         if (fortytwoButton) {
+            fortytwoButton.addEventListener('mouseover', () => hoverSound.play());
             fortytwoButton.addEventListener('click', async () => {
                 playAudio('clickIn');
                 try {
-                    // Vérifier d'abord si nous avons déjà un cookie auth_token
-                    const cookies = document.cookie.split(';');
-                    const authToken = cookies.find(cookie => cookie.trim().startsWith('auth_token='));
-                    
-                    if (authToken) {
-                        window.userStatusService.connect(); // Ajoutez cette ligne
-                        mainMenu.show();
-                        return;
-                    }
-                            
                     const response = await fetch('http://localhost:8000/auth/42/login/');
                     const data = await response.json();
                     if (data.auth_url) {
@@ -123,7 +114,7 @@ class logInMenu extends HTMLElement {
                 }
             });    
         }
-        
+                
         if (backButton) {
             backButton.addEventListener('mouseover', () => hoverSound.play());
             backButton.addEventListener('click', () => {
@@ -144,25 +135,7 @@ class logInMenu extends HTMLElement {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. D'abord vérifier le localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-        try {
-            const cleanedData = storedUser.trim();
-            const userData = JSON.parse(cleanedData);
-            
-            document.dispatchEvent(new CustomEvent('userAuthenticated', { 
-                detail: userData 
-            }));
-            mainMenu.show();
-            return;
-        } catch (error) {
-            console.error('Error parsing stored user:', error);
-            console.log('Raw stored user data:', storedUser);
-        }
-    }
-
-    // 2. Vérifier le hash pour OAuth 42
+    // 1. D'abord vérifier le hash pour OAuth 42
     if (window.location.hash.startsWith('#auth=')) {
         try {
             const encoded = window.location.hash.substring(6);
@@ -182,43 +155,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. Vérifier les cookies
-    const cookies = document.cookie.split(';');
-    console.log("All cookies:", cookies);
-
-    const authToken = cookies.find(cookie => cookie.trim().startsWith('auth_token='));
-    const userCookie = cookies.find(cookie => cookie.trim().startsWith('user='));
-
-    if (authToken && userCookie) {
+    // 2. Ensuite vérifier le localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
         try {
-            let userValue = userCookie.trim();
-            userValue = userValue.substring(userValue.indexOf('=') + 1);
+            const cleanedData = storedUser.trim();
+            const userData = JSON.parse(cleanedData);
             
-            let decodedValue = decodeURIComponent(userValue);
-            console.log("After first decode:", decodedValue);
-
-            const cleanedValue = decodedValue
-                .replace(/\\"/g, '"')
-                .replace(/\\054/g, ',')
-                .replace(/\\\\/g, '\\')
-                .replace(/^"/, '')
-                .replace(/"$/, '')
-                .trim();
-            
-            console.log("Cleaned value:", cleanedValue);
-            
-            const userData = JSON.parse(cleanedValue);
-            console.log("Parsed data:", userData);
-
-            document.dispatchEvent(new CustomEvent('userAuthenticated', {
-                detail: userData
+            document.dispatchEvent(new CustomEvent('userAuthenticated', { 
+                detail: userData 
             }));
             mainMenu.show();
+            return;
         } catch (error) {
-            console.error('Error parsing user data:', error);
-            console.log('Raw cookie value:', userCookie);
+            console.error('Error parsing stored user:', error);
         }
     }
+    
+    // 3. Ne pas vérifier les cookies ici, laissez le backend gérer ça
 });
 
-customElements.define('log-in-menu', logInMenu);X
+customElements.define('log-in-menu', logInMenu);
