@@ -8,9 +8,9 @@
 <body>
     <canvas id="pongCanvas" width="800" height="600"></canvas>
     <script>
+           document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('pongCanvas');
         const ctx = canvas.getContext('2d');
-        console.log(ctx);
         let gameId = null;
         let playerSide = null;
         let ball = { x: 400, y: 300 };
@@ -22,6 +22,7 @@
         const rightPaddleImage = new Image();
         rightPaddleImage.src = 'static/images.png';
 
+        // Démarrer une partie
         async function startGame() {
             try {
                 const response = await fetch('/pong/api/start-game/', { method: 'POST' });
@@ -30,59 +31,60 @@
                 gameId = data.game_id;
                 playerSide = data.player_side;
                 console.log("Starting game with ID:", gameId);
-                console.log("Starting with player side : ", playerSide);
-                updateGameState();
+                console.log("Starting with player side:", playerSide);
+
+                // Commencer les mises à jour en temps réel
+                updateGameState(gameId);
             } catch (error) {
                 console.error("Error starting game:", error);
             }
         }
 
-        async function updateGameState() {
-            try {
-                const response = await fetch(`/pong/api/game-data/${gameId}/`);
-                if (!response.ok) throw new Error("Failed to get game state");
-                const state = await response.json();
+        // Mises à jour en temps réel avec SSE
+        function updateGameState(gameId) {
+            const eventSource = new EventSource(`/pong/api/game-data/${gameId}/`);
+
+            eventSource.onmessage = function (event) {
+                console.log("Game state received:", event.data);
+                const state = JSON.parse(event.data);
                 ball = state.ball;
                 leftPaddle = state.left_paddle;
                 rightPaddle = state.right_paddle;
                 score = state.score;
                 drawGame();
-                setTimeout(updateGameState, 1000 / 120);  // 60 FPS
-            } catch (error) {
-                console.error("Error updating game state:", error);
-            }
+            };
+
+            eventSource.onerror = function (error) {
+                console.error("Error with SSE connection:", error);
+                eventSource.close();
+                setTimeout(() => updateGameState(gameId), 5000); // Essayer de se reconnecter après 5s
+            };
         }
 
+        // Dessiner le jeu
         function drawGame() {
-            console.log("Drawing game with state:", { ball, leftPaddle, rightPaddle, score });
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "white";
-            // ctx.fillRect(10, leftPaddle.y, 10, 100);  // Raquette gauche
-            // ctx.fillRect(780, rightPaddle.y, 10, 100);  // Raquette droite
-
-            // ctx.drawImage(leftPaddleImage, 10, leftPaddle.y, 10, 100); 
-            // ctx.drawImage(rightPaddleImage, 780, rightPaddle.y, 10, 100);
 
             if (leftPaddleImage.complete && rightPaddleImage.complete) {
-                ctx.drawImage(leftPaddleImage, 10, leftPaddle.y, 10, 100); 
+                ctx.drawImage(leftPaddleImage, 10, leftPaddle.y, 10, 100);
                 ctx.drawImage(rightPaddleImage, 780, rightPaddle.y, 10, 100);
-            } else {
-                console.error("Images not loaded yet");
             }
+
             ctx.beginPath();
-            ctx.arc(ball.x, ball.y, 7, 0, Math.PI * 2);  // Balle
+            ctx.arc(ball.x, ball.y, 7, 0, Math.PI * 2); // Balle
             ctx.fill();
             ctx.font = "30px Arial";
-            ctx.fillText(`${score.left} - ${score.right}`, 350, 50);  // Score
+            ctx.fillText(`${score.left} - ${score.right}`, 350, 50); // Score
         }
 
+        // Gérer les actions du joueur
         document.addEventListener('keydown', async (event) => {
             let action = '';
-            if (event.key === 'ArrowUp') 
-                action = 'moove_up';
-            if (event.key === 'ArrowDown') 
-                action = 'moove_down';
+            if (event.key === 'ArrowUp') action = 'moove_up';
+            if (event.key === 'ArrowDown') action = 'moove_down';
+            // console.log("player side ==", playerSide),
 
             if (action) {
                 try {
@@ -94,11 +96,127 @@
                     if (!response.ok) throw new Error("Failed to send action");
                 } catch (error) {
                     console.error("Error sending player action:", error);
+                    console.error("Playerside = ", playerSide);
                 }
             }
         });
 
+        // Démarrer le jeu
         startGame();
+    });
+
+            ///////////////////////////////////////////////////////
+        
+            // const canvas = document.getElementById('pongCanvas');
+        // const ctx = canvas.getContext('2d');
+        // console.log(ctx);
+        // let gameId = null;
+        // let playerSide = null;
+        // let ball = { x: 400, y: 300 };
+        // let leftPaddle = { y: 250 };
+        // let rightPaddle = { y: 250 };
+        // let score = { left: 0, right: 0 };
+        // const leftPaddleImage = new Image();
+        // leftPaddleImage.src = 'static/images.png';
+        // const rightPaddleImage = new Image();
+        // rightPaddleImage.src = 'static/images.png';
+
+        // async function startGame() {
+        //     try {
+        //         const response = await fetch('/pong/api/start-game/', { method: 'POST' });
+        //         if (!response.ok) throw new Error("Failed to start game");
+        //         const data = await response.json();
+        //         gameId = data.game_id;
+        //         playerSide = data.player_side;
+        //         console.log("Starting game with ID:", gameId);
+        //         console.log("Starting with player side : ", playerSide);
+        //         updateGameState(gameId);
+        //     } catch (error) {
+        //         console.error("Error starting game:", error);
+        //     }
+        // }
+
+        // // async function updateGameState() {
+        // //     try {
+        // //         const response = await fetch(`/pong/api/game-data/${gameId}/`);
+        // //         if (!response.ok) throw new Error("Failed to get game state");
+        // //         const state = await response.json();
+        // //         ball = state.ball;
+        // //         leftPaddle = state.left_paddle;
+        // //         rightPaddle = state.right_paddle;
+        // //         score = state.score;
+        // //         drawGame();
+        // //         setTimeout(updateGameState, 1000 / 120);  // 60 FPS
+        // //     } catch (error) {
+        // //         console.error("Error updating game state:", error);
+        // //     }
+        // // }
+        // function updateGameState(gameId) {
+        //     const eventSource = new EventSource(`/pong/api/game-data/${gameId}/`);
+
+        //     eventSource.onmessage = function (event) {
+        //         const state = JSON.parse(event.data);
+        //         ball = state.ball;
+        //         leftPaddle = state.left_paddle;
+        //         rightPaddle = state.right_paddle;
+        //         score = state.score;
+        //         drawGame();
+        //         };
+
+        //     eventSource.onerror = function (error) {
+        //         console.error("Error with SSE connection:", error);
+        //         // Essayer de se reconnecter après une déconnexion
+        //         eventSource.close();
+        //         setTimeout(() => updateGameState(gameId), 5000);
+        //         };
+        //     }
+
+        // function drawGame() {
+        //     console.log("Drawing game with state:", { ball, leftPaddle, rightPaddle, score });
+        //     ctx.fillStyle = "black";
+        //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+        //     ctx.fillStyle = "white";
+        //     // ctx.fillRect(10, leftPaddle.y, 10, 100);  // Raquette gauche
+        //     // ctx.fillRect(780, rightPaddle.y, 10, 100);  // Raquette droite
+
+        //     // ctx.drawImage(leftPaddleImage, 10, leftPaddle.y, 10, 100); 
+        //     // ctx.drawImage(rightPaddleImage, 780, rightPaddle.y, 10, 100);
+
+        //     if (leftPaddleImage.complete && rightPaddleImage.complete) {
+        //         ctx.drawImage(leftPaddleImage, 10, leftPaddle.y, 10, 100); 
+        //         ctx.drawImage(rightPaddleImage, 780, rightPaddle.y, 10, 100);
+        //     } else {
+        //         console.error("Images not loaded yet");
+        //     }
+        //     ctx.beginPath();
+        //     ctx.arc(ball.x, ball.y, 7, 0, Math.PI * 2);  // Balle
+        //     ctx.fill();
+        //     ctx.font = "30px Arial";
+        //     ctx.fillText(`${score.left} - ${score.right}`, 350, 50);  // Score
+        // }
+
+        // document.addEventListener('keydown', async (event) => {
+        //     let action = '';
+        //     if (event.key === 'ArrowUp') 
+        //         action = 'moove_up';
+        //     if (event.key === 'ArrowDown') 
+        //         action = 'moove_down';
+
+        //     if (action) {
+        //         try {
+        //             const response = await fetch(`/pong/api/player-action/${gameId}/`, {
+        //                 method: 'POST',
+        //                 headers: { 'Content-Type': 'application/json' },
+        //                 body: JSON.stringify({ player: playerSide, action })
+        //             });
+        //             if (!response.ok) throw new Error("Failed to send action");
+        //         } catch (error) {
+        //             console.error("Error sending player action:", error);
+        //         }
+        //     }
+        // });
+
+        // startGame();
     </script>
 </body>
 </html>
