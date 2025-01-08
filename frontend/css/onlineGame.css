@@ -1,0 +1,10 @@
+.game-message {
+    z-index: 1000;
+    font-size: 24px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
