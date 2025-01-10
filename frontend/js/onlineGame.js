@@ -205,10 +205,9 @@ class onlineGame extends HTMLElement {
         }
     }
 
-    handleGameEnd(score) {
+    async handleGameEnd(score) {
         this.gameEnded = true;
         
-        // Arrêter la boucle de jeu immédiatement
         if (this.gameLoop) {
             cancelAnimationFrame(this.gameLoop);
             this.gameLoop = null;
@@ -216,7 +215,8 @@ class onlineGame extends HTMLElement {
     
         const messageElement = document.getElementById('gameMessage');
         if (messageElement) {
-            const winner = score.left >= 1 ? 'Left' : 'Right';
+            const isLeftWinner = score.left >= 1;
+            const winner = isLeftWinner ? 'Left' : 'Right';
             messageElement.textContent = `${winner} player wins!`;
             messageElement.style.display = 'block';
             
@@ -226,6 +226,30 @@ class onlineGame extends HTMLElement {
             setTimeout(() => {
                 messageElement.style.opacity = '1';
             }, 50);
+    
+            // Envoyer le résultat au serveur
+            try {
+                const csrfResponse = await fetch('https://localhost:8000/auth/csrf/', {
+                    credentials: 'include'
+                });
+                const csrfData = await csrfResponse.json();
+                
+                await fetch('https://localhost:8000/api/game-result/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfData.csrfToken
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        game_id: this.gameId,
+                        won: (isLeftWinner && this.playerSide === 'left') || 
+                             (!isLeftWinner && this.playerSide === 'right')
+                    })
+                });
+            } catch (error) {
+                console.error('Error updating game result:', error);
+            }
         }
     
         // Retourner au menu après un délai
@@ -233,8 +257,10 @@ class onlineGame extends HTMLElement {
             this.returnToMenu();
         }, 3000);
     }
-    
+        
     async returnToMenu() {
+        await window.userStatusManager?.updateUser();
+
         const container = document.getElementById('dynamicContent');
         if (container) {
             container.innerHTML = '';

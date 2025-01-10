@@ -93,6 +93,28 @@ def quit_game(request, game_id):
         return Response({"error": "Game not found"}, status=404)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_game_result(request):
+    try:
+        game_id = request.data.get('game_id')
+        won = request.data.get('won')
+        
+        game = PongGame.objects.get(id=game_id)
+        user = request.user
+
+        if won:
+            user.wins += 1
+        else:
+            user.losses += 1
+        user.save()
+
+        return Response({'status': 'success'})
+    except PongGame.DoesNotExist:
+        return Response({'error': 'Game not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+@api_view(['POST'])
 def player_action(request, game_id):
 
     try:
