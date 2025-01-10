@@ -30,7 +30,6 @@ class SecurityHeadersMiddleware:
                 'Content-Security-Policy'
             ])
             
-            print('Setting security headers:', dict(response.items()))
 
         return response
 

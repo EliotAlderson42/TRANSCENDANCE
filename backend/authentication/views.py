@@ -332,8 +332,6 @@ def logout_api(request):
 # Dans views.py
 @api_view(['GET'])
 def user_info(request):
-    print("Headers de la requête:", request.headers)  # Debug
-    
     if not request.user.is_authenticated:
         response = Response(
             {'error': 'Not authenticated'}, 

@@ -8,7 +8,8 @@ class onlineGame extends HTMLElement {
         this.gameLoop = null;
         this.playerSide = null;
         this.keys = {};
-        
+        this.gameEnded = false;
+
         // État initial du jeu
         this.gameState = {
             ball: { x: 400, y: 300 },
@@ -28,14 +29,29 @@ class onlineGame extends HTMLElement {
             <div class="game-container">
                 <div class="game-view">
                     <div class="score-board">
-                        <span id="leftScore">0</span>
-                        <span>-</span>
-                        <span id="rightScore">0</span>
+                        <div class="score">
+                            <span id="leftScore">0</span>
+                            <span class="score-separator">-</span>
+                            <span id="rightScore">0</span>
+                        </div>
                     </div>
-                    <div id="waitingMessage" style="display: none;" class="waiting-message">
-                        Waiting for opponent...
+                    <div style="position: relative;">
+                        <canvas id="pongCanvas" width="800" height="600" class="pong-canvas"></canvas>
+                        <div id="gameMessage" style="
+                            display: none;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            background-color: rgba(0, 0, 0, 0.8);
+                            color: white;
+                            padding: 20px 40px;
+                            border-radius: 5px;
+                            font-size: 24px;
+                            text-align: center;
+                            z-index: 1000;
+                        "></div>
                     </div>
-                    <canvas id="pongCanvas" width="800" height="600" class="pong-canvas"></canvas>
                     <div class="game-controls">
                         <button id="quitGame" class="buttonLambda hoverLambda">Quit Game</button>
                     </div>
@@ -150,8 +166,23 @@ class onlineGame extends HTMLElement {
         });
     }
 
-    updateGameState(newState) {
+
+     updateGameState(newState) {
         if (newState && typeof newState === 'object') {
+            // Mise à jour du score
+            if (newState.score) {
+                const leftScore = this.querySelector('#leftScore');
+                const rightScore = this.querySelector('#rightScore');
+                if (leftScore) leftScore.textContent = newState.score.left;
+                if (rightScore) rightScore.textContent = newState.score.right;
+                
+                // Vérifier la condition de victoire
+                if (!this.gameEnded && (newState.score.left >= 1 || newState.score.right >= 1)) {
+                    this.handleGameEnd(newState.score);
+                }
+            }
+            
+            // Mise à jour de l'état
             this.gameState = {
                 ball: {
                     x: newState.ball?.x ?? this.gameState.ball.x,
@@ -168,7 +199,46 @@ class onlineGame extends HTMLElement {
                     right: newState.score?.right ?? this.gameState.score.right
                 }
             };
+            
+            // Dessiner l'état mis à jour
             this.draw(this.gameState);
+        }
+    }
+
+    handleGameEnd(score) {
+        this.gameEnded = true;
+        
+        // Arrêter la boucle de jeu immédiatement
+        if (this.gameLoop) {
+            cancelAnimationFrame(this.gameLoop);
+            this.gameLoop = null;
+        }
+    
+        const messageElement = document.getElementById('gameMessage');
+        if (messageElement) {
+            const winner = score.left >= 1 ? 'Left' : 'Right';
+            messageElement.textContent = `${winner} player wins!`;
+            messageElement.style.display = 'block';
+            
+            // Ajouter une animation de fade in
+            messageElement.style.opacity = '0';
+            messageElement.style.transition = 'opacity 0.5s ease-in-out';
+            setTimeout(() => {
+                messageElement.style.opacity = '1';
+            }, 50);
+        }
+    
+        // Retourner au menu après un délai
+        setTimeout(() => {
+            this.returnToMenu();
+        }, 3000);
+    }
+    
+    async returnToMenu() {
+        const container = document.getElementById('dynamicContent');
+        if (container) {
+            container.innerHTML = '';
+            onlineMenu.show();
         }
     }
 
