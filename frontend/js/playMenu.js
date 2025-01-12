@@ -1,25 +1,50 @@
 class playMenu extends HTMLElement {
     constructor() {
         super();
+        this.handleLanguageChange = this.updateContent.bind(this);
     }
 
     async connectedCallback() {
         const user = await window.userStatusManager?.getUser();
-        if(!user)
-        {
+        if(!user) {
             mainMenu.show();
             return;
         }
+
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
+    }
+
+    async updateContent() {
         this.innerHTML = `
         <div id="dynamicContent">
-            <h1 id="playMenuTitle" class="menusTitle">Play</h1>
-            <button id="localButton" class="hoverLambda buttonLambda">Local</button>
-            <button id="onlineButton" class="hoverLambda buttonLambda">Online</button>
-            <button id="friendsButton" class="hoverLambda buttonLambda">Friends</button>
-            <button id="backButton" class="hoverLambda backButtons">Back</button>
+            <h1 id="playMenuTitle" class="menusTitle">
+                ${window.translationManager.translate('playMenu.title')}
+            </h1>
+            <button id="localButton" class="hoverLambda buttonLambda">
+                ${window.translationManager.translate('playMenu.local')}
+            </button>
+            <button id="onlineButton" class="hoverLambda buttonLambda">
+                ${window.translationManager.translate('playMenu.online')}
+            </button>
+            <button id="friendsButton" class="hoverLambda buttonLambda">
+                ${window.translationManager.translate('playMenu.friends')}
+            </button>
+            <button id="backButton" class="hoverLambda backButtons">
+                ${window.translationManager.translate('back')}
+            </button>
         </div>
         `;
 
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
         this.querySelector('#localButton').addEventListener('mouseover', () => hoverSound.play());
         this.querySelector('#localButton').addEventListener('click', () => {
             playAudio('clickIn');

@@ -1,6 +1,17 @@
 class signUpMenu extends HTMLElement {
     constructor() {
         super();
+        this.handleLanguageChange = this.updateContent.bind(this);
+    }
+
+    async connectedCallback() {
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
     }
 
     async getCsrfToken() {
@@ -16,20 +27,33 @@ class signUpMenu extends HTMLElement {
         }
     }
 
-    connectedCallback() {
+    async updateContent() {
         this.innerHTML = `
         <div id="dynamicContent">
-            <h1 id="signUpMenuTitle" class="menusTitle">Sign Up</h1>
+            <h1 id="signUpMenuTitle" class="menusTitle">
+                ${window.translationManager.translate('signUpMenu.title')}
+            </h1>
             <form id="signUpForm">
-                <input id="usernameInput" class="inputLambda" type="text" placeholder="Username" required>
-                <input id="passwordInput" class="inputLambda" type="password" placeholder="Password" required>
-                <input id="secondPasswordInput" class="inputLambda" type="password" placeholder="Confirm password" required>
-                <button type="submit" id="signUpButton" style="margin-top: 1vh;" class="hoverLambda">Sign Up</button>
+                <input id="usernameInput" class="inputLambda" type="text" 
+                    placeholder="${window.translationManager.translate('signUpMenu.username')}" required>
+                <input id="passwordInput" class="inputLambda" type="password" 
+                    placeholder="${window.translationManager.translate('signUpMenu.password')}" required>
+                <input id="secondPasswordInput" class="inputLambda" type="password" 
+                    placeholder="${window.translationManager.translate('signUpMenu.confirmPassword')}" required>
+                <button type="submit" id="signUpButton" style="margin-top: 1vh;" class="hoverLambda">
+                    ${window.translationManager.translate('signUpMenu.submit')}
+                </button>
             </form>
-            <button id="backButton" class="hoverLambda backButtons">Back</button>
+            <button id="backButton" class="hoverLambda backButtons">
+                ${window.translationManager.translate('back')}
+            </button>
         </div>
         `;
 
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
         const form = this.querySelector('#signUpForm');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -38,7 +62,7 @@ class signUpMenu extends HTMLElement {
             const confirmPassword = this.querySelector('#secondPasswordInput').value;
         
             if (password !== confirmPassword) {
-                alert("Les mots de passe ne correspondent pas");
+                alert(window.translationManager.translate('signUpMenu.passwordMismatch'));
                 return;
             }
         
@@ -52,18 +76,14 @@ class signUpMenu extends HTMLElement {
                     window.userStatusManager.connect();
                     mainMenu.show();
                 } else {
-                    throw new Error('Failed to get user data after registration');
+                    throw new Error(window.translationManager.translate('signUpMenu.userDataError'));
                 }
             } catch (error) {
                 console.error("Registration error:", error);
-                alert('Registration failed: ' + error.message);
+                alert(window.translationManager.translate('signUpMenu.registrationError') + ': ' + error.message);
             }
         });    
     
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
         const signUpButton = this.querySelector('#signUpButton');
         const backButton = this.querySelector('#backButton');
 

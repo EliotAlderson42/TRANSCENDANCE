@@ -115,6 +115,11 @@
   width: 30%;              /* réduit de 50% à 30% pour matcher les inputs */
 }
 
+.buttonLambda.selected {
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
 #fortytwoButton {
   width: 15% !important;   /* gardé plus petit comme demandé dans ton HTML */
   height: auto !important; /* ajusté automatiquement */
@@ -132,6 +137,16 @@ body{
   height: 80vh;
   background: linear-gradient(-25deg, #9f0d0d, #000000, #101455);
   background-size: 400% 400%;
+}
+
+.spanish {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.4em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+  color: #FF9B00; /* Une couleur orange chaleureuse */
+  background-color: #000000;
+  transition: text-shadow 0.3s;
 }
 
 #dynamicContent {

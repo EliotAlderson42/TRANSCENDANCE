@@ -1,6 +1,17 @@
 class logInMenu extends HTMLElement {
     constructor() {
         super();
+        this.handleLanguageChange = this.updateContent.bind(this);
+    }
+
+    async connectedCallback() {
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
     }
 
     async getCsrfToken() {
@@ -16,20 +27,34 @@ class logInMenu extends HTMLElement {
         }
     }
 
-    async connectedCallback() {
+    async updateContent() {
         this.innerHTML = `
         <div id="dynamicContent">
-            <h1 id="logInMenuTitle" class="menusTitle">Log in</h1>
+            <h1 id="logInMenuTitle" class="menusTitle">
+                ${window.translationManager.translate('logInMenu.title')}
+            </h1>
             <form id="loginForm">
-                <input id="usernameInput" class="inputLambda" type="text" placeholder="Username" required>
-                <input id="passwordInput" class="inputLambda" type="password" placeholder="Password" required>
-                <button type="submit" id="logInButton" style="margin-top: 1vh;" class="hoverLambda">Log In</button>
+                <input id="usernameInput" class="inputLambda" type="text" 
+                    placeholder="${window.translationManager.translate('logInMenu.username')}" required>
+                <input id="passwordInput" class="inputLambda" type="password" 
+                    placeholder="${window.translationManager.translate('logInMenu.password')}" required>
+                <button type="submit" id="logInButton" style="margin-top: 1vh;" class="hoverLambda">
+                    ${window.translationManager.translate('logInMenu.submit')}
+                </button>
             </form>
-            <button id="fortytwoButton" style="margin-top: 3vh;width: 10%; height: 10%;" class="hoverLambda buttonLambda">42 intra</button>
-            <button id="backButton" class="hoverLambda backButtons">Back</button>
+            <button id="fortytwoButton" style="margin-top: 3vh;width: 10%; height: 10%;" class="hoverLambda buttonLambda">
+                ${window.translationManager.translate('logInMenu.or42')}
+            </button>
+            <button id="backButton" class="hoverLambda backButtons">
+                ${window.translationManager.translate('back')}
+            </button>
         </div>
         `;
 
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
         const form = this.querySelector('#loginForm');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -52,7 +77,7 @@ class logInMenu extends HTMLElement {
                 });
         
                 if (!response.ok) {
-                    throw new Error('Login failed');
+                    throw new Error(window.translationManager.translate('logInMenu.loginError'));
                 }
         
                 // Obtenir les données utilisateur après le login
@@ -64,18 +89,14 @@ class logInMenu extends HTMLElement {
                     window.userStatusManager.connect();
                     mainMenu.show();
                 } else {
-                    throw new Error('Failed to get user data after login');
+                    throw new Error(window.translationManager.translate('logInMenu.userDataError'));
                 }
             } catch (error) {
                 console.error("Login error:", error);
-                alert('Login failed: ' + error.message);
+                alert(error.message);
             }
         });
-        
-        this.setupEventListeners();
-    }
 
-    setupEventListeners() {
         const logInButton = this.querySelector('#logInButton');
         const fortytwoButton = this.querySelector('#fortytwoButton');
         const backButton = this.querySelector('#backButton');
@@ -124,6 +145,7 @@ class logInMenu extends HTMLElement {
     }
 }
 
+// OAuth 42 callback handling
 document.addEventListener('DOMContentLoaded', async () => {
     // Vérifier d'abord le hash pour OAuth 42
     if (window.location.hash.startsWith('#auth=')) {
@@ -136,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // S'assurer que la session est bien établie
                 const user = await window.userStatusManager.updateUser();
                 if (!user) {
-                    throw new Error('Failed to establish session');
+                    throw new Error(window.translationManager.translate('logInMenu.userDataError'));
                 }
                 
                 // Déclencher l'événement avec les données complètes
@@ -150,23 +172,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 window.location.hash = '';
-                user = await window.userStatusManager?.updateUser();
                 mainMenu.show();
             }
         } catch (error) {
             console.error('Error handling OAuth callback:', error);
-            // Rediriger vers la page de login en cas d'erreur
             authenticationMenu.show();
         }
-    }
-    
-    // Vérifier si l'utilisateur est déjà connecté
-    const user = window.userStatusManager?.getUser();
-    if (user) {
-        document.dispatchEvent(new CustomEvent('userAuthenticated', { 
-            detail: user 
-        }));
-        mainMenu.show();
     }
 });
 

@@ -2,6 +2,20 @@ class mainMenu extends HTMLElement {
     constructor() {
         super();
         this.checkAuthFragment();
+        this.handleLanguageChange = this.updateContent.bind(this);
+    }
+
+    async connectedCallback() {
+        // S'assurer que le TranslationManager est initialisé
+        await window.translationManager.init();
+        // Add observer for language changes
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        // Remove observer when component is destroyed
+        window.translationManager.removeObserver(this.handleLanguageChange);
     }
 
     async checkAuthFragment() {
@@ -25,37 +39,34 @@ class mainMenu extends HTMLElement {
         }
     }
 
-    async connectedCallback() {
+    async updateContent() {
         const user = window.userStatusManager?.getUser();
         this.innerHTML = `
             <div id="dynamicContent">
                 <button id="pongButton" class="stealthButton FadeIn" 
                         style="font-size: 12em; color: white; margin-bottom: 0.1em;">
-                    PONG
+                        ${window.translationManager.translate('PONG')}
                 </button>
-                <button id="playButton" class="buttonLambda hoverLambda">Play</button>
-                <button id="settingsButton" class="buttonLambda hoverLambda">Settings</button>
-                ${user ? `<button id="logoutButton" class="buttonLambda hoverLambda">Logout</button>` 
-                      : `<button id="authenticateButton" class="buttonLambda hoverLambda">Authenticate</button>`}
+                <button id="playButton" class="buttonLambda hoverLambda">
+                    ${window.translationManager.translate('play')}
+                </button>
+                <button id="settingsButton" class="buttonLambda hoverLambda">
+                    ${window.translationManager.translate('settings')}
+                </button>
+                ${user 
+                    ? `<button id="logoutButton" class="buttonLambda hoverLambda">
+                         ${window.translationManager.translate('logout')}
+                       </button>`
+                    : `<button id="authenticateButton" class="buttonLambda hoverLambda">
+                         ${window.translationManager.translate('authenticate')}
+                       </button>`
+                }
             </div>
         `;
         this.setupEventListeners();
     }
 
-    async getCsrfToken() {
-        try {
-            const response = await fetch('https://localhost:8000/auth/csrf/', { 
-                credentials: 'include'
-            });
-            const data = await response.json();
-            return data.csrfToken;
-        } catch (error) {
-            console.error('Error fetching CSRF token:', error);
-            return null;
-        }
-    }
-
-    setupEventListeners() {
+    async setupEventListeners() {
         const playButton = this.querySelector('#playButton');
         if (playButton) {
             playButton.addEventListener('mouseover', () => hoverSound.play());
@@ -105,6 +116,7 @@ class mainMenu extends HTMLElement {
         }
     }
 }
+
 
 class initialPage extends HTMLElement {
     constructor() {

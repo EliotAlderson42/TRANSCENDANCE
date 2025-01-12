@@ -1,6 +1,7 @@
 class audioMenu extends HTMLElement {
     constructor() {
         super();
+        this.handleLanguageChange = this.updateContent.bind(this);
     }
 
     // Ajouter des méthodes pour gérer le stockage
@@ -32,15 +33,34 @@ class audioMenu extends HTMLElement {
         this.querySelector('#soundSlider').value = settings.sound;
     }
 
-    connectedCallback() {
+    async connectedCallback() {
+        // Add observer for language changes
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
+    }
+
+    async updateContent() {
         this.innerHTML = `
         <div id="dynamicContent">
-            <h1 id="audioMenuTitle" class="menusTitle">Audio</h1>
-            <div id="ambientText" class="audioMenu-Text">Ambient volume</div>
+            <h1 id="audioMenuTitle" class="menusTitle">
+                ${window.translationManager.translate('audioMenu.title')}
+            </h1>
+            <div id="ambientText" class="audioMenu-Text">
+                ${window.translationManager.translate('audioMenu.ambientVolume')}
+            </div>
             <input id="ambientSlider" class="audioMenu-VolumeSlider" type="range" min="0" max="100" value="100"></input>
-            <div id="soundText" class="audioMenu-Text">Sound volume</div>
+            <div id="soundText" class="audioMenu-Text">
+                ${window.translationManager.translate('audioMenu.soundVolume')}
+            </div>
             <input id="soundSlider" class="audioMenu-VolumeSlider" type="range" min="0" max="100" value="100"></input>
-            <button id="backButton" class="hoverLambda backButtons">Back</button>
+            <button id="backButton" class="hoverLambda backButtons">
+                ${window.translationManager.translate('back')}
+            </button>
         </div>
         `;
 
@@ -48,11 +68,18 @@ class audioMenu extends HTMLElement {
         const savedSettings = this.loadAudioSettings();
         this.applyAudioSettings(savedSettings);
 
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
         // Event listeners avec sauvegarde
         this.querySelector('#ambientSlider').addEventListener('input', (e) => {
             const volume = e.target.value / 100;
             document.getElementById('backgroundAudio').volume = volume;
-            this.saveAudioSettings(e.target.value, this.querySelector('#soundSlider').value);
+            this.saveAudioSettings(
+                e.target.value,
+                this.querySelector('#soundSlider').value
+            );
         });
 
         this.querySelector('#soundSlider').addEventListener('input', (e) => {
@@ -61,7 +88,10 @@ class audioMenu extends HTMLElement {
             document.getElementById('hoverSound').volume = soundVolume;
             document.getElementById('clickIn').volume = soundVolume;
             document.getElementById('clickOut').volume = soundVolume;
-            this.saveAudioSettings(this.querySelector('#ambientSlider').value, e.target.value);
+            this.saveAudioSettings(
+                this.querySelector('#ambientSlider').value,
+                e.target.value
+            );
         });
 
         this.querySelector('#backButton').addEventListener('mouseover', () => hoverSound.play());

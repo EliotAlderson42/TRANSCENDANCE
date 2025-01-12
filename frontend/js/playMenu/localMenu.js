@@ -6,13 +6,13 @@ class localMenu extends HTMLElement {
         this.ctx = null;
         this.gameSocket = null;
         this.gameLoop = null;
+        this.handleLanguageChange = this.updateContent.bind(this);
         this.keys = {
-            'KeyW': false,  // Changé de 'w' à 'KeyW'
-            'KeyS': false,  // Changé de 's' à 'KeyS'
+            'KeyW': false,
+            'KeyS': false,
             'ArrowUp': false,
             'ArrowDown': false
         };
-        // État initial du jeu
         this.gameState = {
             ball: { x: 400, y: 300 },
             leftPaddle: { y: 250 },
@@ -25,7 +25,19 @@ class localMenu extends HTMLElement {
         this.boundHandleKeyUp = this.handleKeyUp.bind(this);
     }
 
+
     async connectedCallback() {
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
+        this.cleanupAndQuit();
+    }
+
+    async updateContent() {
         this.innerHTML = `
             <div class="game-container">
                 <div class="game-view">
@@ -36,7 +48,9 @@ class localMenu extends HTMLElement {
                     </div>
                     <canvas id="pongCanvas" width="800" height="600" class="pong-canvas"></canvas>
                     <div class="game-controls">
-                        <button id="quitGame" class="buttonLambda hoverLambda">Quit Game</button>
+                        <button id="quitGame" class="buttonLambda hoverLambda">
+                            ${window.translationManager.translate('localMenu.quitGame')}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -48,12 +62,14 @@ class localMenu extends HTMLElement {
         await this.startGame();
     }
 
+
     setupEventListeners() {
         document.addEventListener('keydown', this.boundHandleKeyDown);
         document.addEventListener('keyup', this.boundHandleKeyUp);
 
         const quitButton = this.querySelector('#quitGame');
         if (quitButton) {
+            quitButton.addEventListener('mouseover', () => hoverSound.play());
             quitButton.addEventListener('click', () => {
                 playAudio('clickIn');
                 this.cleanupAndQuit();
@@ -62,7 +78,7 @@ class localMenu extends HTMLElement {
 
         document.addEventListener('keydown', this.boundHandleKeyPress);
     }
-    
+
     handleKeyDown(event) {
         // Utiliser event.code au lieu de event.key
         if (this.keys.hasOwnProperty(event.code)) {
@@ -312,8 +328,7 @@ class localMenu extends HTMLElement {
     }
 
     async cleanupAndQuit() {
-        // Nettoyer tous les événements et ressources d'abord
-        document.removeEventListener('keydown', this.boundHandleKeyPress);
+        document.removeEventListener('keydown', this.boundHandleKeyDown);
         document.removeEventListener('keyup', this.boundHandleKeyUp);
 
         if (this.gameLoop) {
@@ -321,15 +336,15 @@ class localMenu extends HTMLElement {
             this.gameLoop = null;
         }
 
-        // Nettoyer le canvas avant de quitter
         if (this.ctx && this.canvas) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
-        // Envoyer la demande de sortie au serveur
         if (this.gameId) {
             try {
-                const csrfResponse = await fetch('https://localhost:8000/auth/csrf/', { credentials: 'include' });
+                const csrfResponse = await fetch('https://localhost:8000/auth/csrf/', {
+                    credentials: 'include'
+                });
                 const csrfData = await csrfResponse.json();
 
                 await fetch(`https://localhost:8000/api/quit-game/${this.gameId}/`, {
@@ -345,24 +360,14 @@ class localMenu extends HTMLElement {
             }
         }
 
-        // Fermer la connexion WebSocket en dernier
-        if (this.gameSocket) {
-            this.gameSocket.close();
-            this.gameSocket = null;
-        }
-
-        // Réinitialiser les variables
-        this.gameId = null;
-        this.canvas = null;
-        this.ctx = null;
-
-        // Retourner au menu principal
+        // Nettoyer les ressources et retourner au menu principal
         const container = document.getElementById('dynamicContent');
         if (container) {
-            container.innerHTML = ''; // Nettoyer le contenu
-            mainMenu.show();
+            container.innerHTML = '';
+            playMenu.show();
         }
     }
+
 
     disconnectedCallback() {
         this.cleanupAndQuit();

@@ -3,6 +3,7 @@ class onlineMenu extends HTMLElement {
         super();
         this.isSearching = false;
         this.searchTimeout = null;
+        this.handleLanguageChange = this.updateContent.bind(this);
     }
 
     async connectedCallback() {
@@ -12,19 +13,44 @@ class onlineMenu extends HTMLElement {
             return;
         }
 
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
+        this.stopSearching();
+    }
+
+    async updateContent() {
         this.innerHTML = `
             <div id="dynamicContent">
-                <h1 id="onlineMenuTitle" class="menusTitle">Online Mode</h1>
+                <h1 id="onlineMenuTitle" class="menusTitle">
+                    ${window.translationManager.translate('onlineMenu.title')}
+                </h1>
                 <div id="queueStatus" style="display: none;" class="text-center my-4">
-                    <p>Searching for opponent...</p>
-                    <p>Time in queue: <span id="queueTimer">0:00</span></p>
+                    <p>${window.translationManager.translate('onlineMenu.searching')}</p>
+                    <p>${window.translationManager.translate('onlineMenu.queueTime')} <span id="queueTimer">0:00</span></p>
                 </div>
-                <button id="findGameButton" class="hoverLambda buttonLambda">Find Game</button>
-                <button id="backButton" class="hoverLambda backButtons">Back</button>
+                <button id="findGameButton" class="hoverLambda buttonLambda">
+                    ${window.translationManager.translate(this.isSearching ? 'onlineMenu.cancelSearch' : 'onlineMenu.findGame')}
+                </button>
+                <button id="backButton" class="hoverLambda backButtons">
+                    ${window.translationManager.translate('back')}
+                </button>
             </div>
         `;
 
         this.setupEventListeners();
+        
+        // Si on était en recherche avant la mise à jour du contenu, remettre l'affichage
+        if (this.isSearching) {
+            const queueStatus = this.querySelector('#queueStatus');
+            if (queueStatus) {
+                queueStatus.style.display = 'block';
+            }
+        }
     }
 
     setupEventListeners() {
@@ -58,17 +84,14 @@ class onlineMenu extends HTMLElement {
         const queueStatus = this.querySelector('#queueStatus');
         
         if (findGameButton) {
-            findGameButton.textContent = 'Cancel Search';
+            findGameButton.textContent = window.translationManager.translate('onlineMenu.cancelSearch');
         }
         if (queueStatus) {
             queueStatus.style.display = 'block';
         }
 
-        // Start the queue timer
         this.startTime = Date.now();
         this.updateQueueTimer();
-
-        // Initialize WebSocket connection and send queue request
         this.initializeGameSocket();
     }
 
@@ -78,7 +101,7 @@ class onlineMenu extends HTMLElement {
         const queueStatus = this.querySelector('#queueStatus');
         
         if (findGameButton) {
-            findGameButton.textContent = 'Find Game';
+            findGameButton.textContent = window.translationManager.translate('onlineMenu.findGame');
         }
         if (queueStatus) {
             queueStatus.style.display = 'none';
@@ -89,7 +112,6 @@ class onlineMenu extends HTMLElement {
             this.searchTimeout = null;
         }
 
-        // Close WebSocket if open
         if (this.gameSocket && this.gameSocket.readyState === WebSocket.OPEN) {
             this.gameSocket.send(JSON.stringify({
                 type: 'leave_queue'
@@ -125,18 +147,15 @@ class onlineMenu extends HTMLElement {
             }));
         };
 
-        // Dans onlineMenu.js
         this.gameSocket.onmessage = async (event) => {
             try {
                 const data = JSON.parse(event.data);
                 
                 if (data.type === 'game_found' && data.game_id) {
                     this.stopSearching();
-                    // Stocker les informations de la partie
                     const gameId = data.game_id;
                     const playerSide = data.player_side;
                     
-                    // Créer le composant de jeu avec le bon côté
                     const container = document.getElementById('dynamicContent');
                     if (container) {
                         container.innerHTML = '';
@@ -162,30 +181,12 @@ class onlineMenu extends HTMLElement {
         };
     }
 
-    async startOnlineGame(gameId, playerSide) {
-        this.stopSearching();
+    static show() {
         const container = document.getElementById('dynamicContent');
-        if (container) {
-            container.innerHTML = '';
-            const gameComponent = document.createElement('online-game');
-            container.appendChild(gameComponent);
-            await gameComponent.initGame(gameId, playerSide);
-        }
+        container.innerHTML = '';
+        const onlineMenuComponent = document.createElement('online-menu');
+        container.appendChild(onlineMenuComponent);
     }
-
-    disconnectedCallback() {
-        this.stopSearching();
-        if (this.gameSocket) {
-            this.gameSocket.close();
-        }
-    }
-
-        static show() {
-            const container = document.getElementById('dynamicContent');
-            container.innerHTML = '';
-            const onlineMenuComponent = document.createElement('online-menu');
-            container.appendChild(onlineMenuComponent);
-        }
-    }
+}
 
 customElements.define('online-menu', onlineMenu);

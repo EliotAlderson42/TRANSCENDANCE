@@ -1,24 +1,51 @@
 class settingsMenu extends HTMLElement {
     constructor() {
         super();
+        this.handleLanguageChange = this.updateContent.bind(this);
     }
 
-     async connectedCallback() {
+    async connectedCallback() {
         const user = window.userStatusManager?.getUser();
         if (!user) {
             mainMenu.show();
             return;
         }
+        await window.translationManager.init();
+        window.translationManager.addObserver(this.handleLanguageChange);
+        await this.updateContent();
+    }
+
+    disconnectedCallback() {
+        window.translationManager.removeObserver(this.handleLanguageChange);
+    }
+
+    async updateContent() {
+        const user = window.userStatusManager?.getUser();
+        
         this.innerHTML = `
         <div id="dynamicContent">
-            <h1 id="settingsMenuTitle" class="menusTitle">Settings</h1>
-            ${user ? `<button id="accountButton" class="hoverLambda buttonLambda">Account</button>` : ''}
-            <button id="languageButton" class="hoverLambda buttonLambda">Language</button>
-            <button id="audioButton" class="hoverLambda buttonLambda">Audio</button>
-            <button id="backButton" class="hoverLambda backButtons">Back</button>
+            <h1 id="settingsMenuTitle" class="menusTitle">
+                ${window.translationManager.translate('settingsMenu.title')}
+            </h1>
+            ${user ? `<button id="accountButton" class="hoverLambda buttonLambda">
+                        ${window.translationManager.translate('settingsMenu.account')}
+                      </button>` : ''}
+            <button id="languageButton" class="hoverLambda buttonLambda">
+                ${window.translationManager.translate('settingsMenu.language')}
+            </button>
+            <button id="audioButton" class="hoverLambda buttonLambda">
+                ${window.translationManager.translate('settingsMenu.audio')}
+            </button>
+            <button id="backButton" class="hoverLambda backButtons">
+                ${window.translationManager.translate('back')}
+            </button>
         </div>
         `;
 
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
         // Setup des event listeners seulement si le bouton existe (utilisateur connecté)
         const accountButton = this.querySelector('#accountButton');
         if (accountButton) {

@@ -101,7 +101,6 @@
 │   │   │   └── python3.10
 │   │   ├── lib64
 │   │   └── pyvenv.cfg
-│   ├── frontend
 │   ├── manage.py
 │   ├── media
 │   │   └── avatars
@@ -157,7 +156,9 @@
 │   │   ├── gameMenu.css
 │   │   ├── historyMenu.css
 │   │   ├── languageMenu.css
+│   │   ├── localMenu.css
 │   │   ├── mainMenu.css
+│   │   ├── onlineGame.css
 │   │   ├── settingsMenu.css
 │   │   ├── statsMenu.css
 │   │   └── style.css
@@ -176,6 +177,7 @@
 │   │   ├── authenticationMenu.js
 │   │   ├── containers.js
 │   │   ├── mainMenu.js
+│   │   ├── onlineGame.js
 │   │   ├── playMenu
 │   │   │   ├── friendsMenu.js
 │   │   │   ├── localMenu.js
@@ -188,7 +190,6 @@
 │   │   ├── settingsMenu.js
 │   │   ├── switchLanguage.js
 │   │   └── userStatus.js
-│   ├── media
 │   └── nginx.conf
 ├── menus roadmap.png
 ├── modules-choisis.txt
@@ -224,4 +225,4 @@
 ├── transcendance.env
 └── tree.txt
 
-37 directories, 187 files
+35 directories, 190 files
